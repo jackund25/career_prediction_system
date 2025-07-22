@@ -1,0 +1,68 @@
+{
+  "model_comparison": [
+    {
+      "Model": "RF Simple",
+      "Type": "Baseline",
+      "Accuracy": 0.9783616692426584,
+      "F1-Score": 0.9783616692426584,
+      "ROC-AUC": 0.9981563421828908
+    },
+    {
+      "Model": "RF Tuned",
+      "Type": "Baseline",
+      "Accuracy": 0.9783616692426584,
+      "F1-Score": 0.9783616692426584,
+      "ROC-AUC": 0.9981563421828908
+    },
+    {
+      "Model": "MLP Simple",
+      "Type": "Baseline",
+      "Accuracy": 0.8686244204018547,
+      "F1-Score": 0.8668268128418337,
+      "ROC-AUC": 0.9664789487798338
+    },
+    {
+      "Model": "MLP Tuned",
+      "Type": "Baseline",
+      "Accuracy": 0.9057187017001546,
+      "F1-Score": 0.905589274301145,
+      "ROC-AUC": 0.9673696509979696
+    },
+    {
+      "Model": "Xgboost",
+      "Type": "Advanced",
+      "Accuracy": 0.9984544049459042,
+      "F1-Score": 0.9984542865052471,
+      "ROC-AUC": 1.0
+    },
+    {
+      "Model": "Catboost",
+      "Type": "Advanced",
+      "Accuracy": 0.9984544049459042,
+      "F1-Score": 0.9984545159510576,
+      "ROC-AUC": 0.99996647894878
+    },
+    {
+      "Model": "Ensemble",
+      "Type": "Advanced",
+      "Accuracy": 0.9984544049459042,
+      "F1-Score": 0.9984545159510576,
+      "ROC-AUC": 1.0
+    }
+  ],
+  "best_model": {
+    "name": "Catboost",
+    "type": "Advanced",
+    "f1_score": 0.9984545159510576,
+    "accuracy": 0.9984544049459042,
+    "roc_auc": 0.99996647894878
+  },
+  "temporal_analysis": {
+    "samples_2016": 2422,
+    "avg_confidence": 0.984080777542569,
+    "prediction_distribution": {
+      "ya": 1428,
+      "tidak": 994
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "best_model": "catboost",
+  "best_f1_score": 0.9984545159510576,
+  "feature_selection_used": true,
+  "n_features": 30
+}
