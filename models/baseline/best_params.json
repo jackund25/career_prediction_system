@@ -1,0 +1,39 @@
+{
+    "without_leaky": {
+        "RandomForest": {
+            "n_estimators": 88,
+            "max_depth": 3,
+            "min_samples_split": 7,
+            "min_samples_leaf": 7,
+            "max_features": null,
+            "bootstrap": true
+        },
+        "MLP": {
+            "n_layers": 2,
+            "n_units_l0": 150,
+            "n_units_l1": 116,
+            "activation": "tanh",
+            "solver": "adam",
+            "alpha": 1.42856761240024e-05,
+            "learning_rate": "adaptive"
+        }
+    },
+    "with_leaky": {
+        "RandomForest": {
+            "n_estimators": 70,
+            "max_depth": 20,
+            "min_samples_split": 15,
+            "min_samples_leaf": 6,
+            "max_features": "sqrt",
+            "bootstrap": true
+        },
+        "MLP": {
+            "n_layers": 1,
+            "n_units_l0": 162,
+            "activation": "relu",
+            "solver": "adam",
+            "alpha": 0.0004102589542391925,
+            "learning_rate": "adaptive"
+        }
+    }
+}

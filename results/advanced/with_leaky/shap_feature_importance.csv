@@ -1,0 +1,13 @@
+feature,importance
+relationship_level_ordinal,0.4183335051546394
+job_category_encoded,0.05489793814432991
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]_numeric,0.029125257731958776
+program_studi_clean_encoded,0.024763917525773196
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan],0.01426752577319589
+technical_x_relationship,0.013438659793814445
+ip_x_org_active,0.012760309278350519
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]_numeric,0.011457216494845364
+ip_numeric,0.011382989690721657
+is_technical,0.009425773195876284
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan],0.0067974226804123706
+IP,0.004640206185567009

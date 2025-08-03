@@ -165,8 +165,7 @@ $RECYCLE.BIN/
 .Trash-*
 .nfs*
 
-# Data files (adjust based on your needs)
-# Uncomment if you want to exclude data files
+# Data files
 data/01_raw/*
 data/02_processed/*
 !data/01_raw/.gitkeep
@@ -180,6 +179,8 @@ models/*.pt
 models/*.pth
 models/*.onnx
 models/*.pb
+models/**/*.pkl
+models/**/*.joblib
 *.pkl
 *.joblib
 *.h5
@@ -197,13 +198,44 @@ models/*.pb
 logs/
 *.log
 
-# Output files and reports
-# Adjust based on your project structure
-# reports/figures/*.png
-# reports/figures/*.jpg
-# reports/figures/*.pdf
-# reports/*.html
-# reports/*.pdf
+# Output files and reports - INCLUDING IMAGES
+reports/figures/*.png
+reports/figures/*.jpg
+reports/figures/*.jpeg
+reports/figures/*.gif
+reports/figures/*.svg
+reports/figures/*.pdf
+reports/*.html
+reports/*.pdf
+
+# Plot outputs
+plots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.pdf
+*.eps
+*.tiff
+*.bmp
+
+# Visualization outputs
+visualizations/
+figures/
+images/
+output_images/
+results/figures/
+results/plots/
+results/images/
+results/**/*.png
+results/**/*.jpg
+results/**/*.pdf
+
+# But keep specific documentation images if needed
+!docs/images/*.png
+!docs/images/*.jpg
+!README_images/*.png
 
 # Credentials and secrets
 credentials/
@@ -228,6 +260,12 @@ config/credentials.yaml
 # Excel temporary files
 ~$*.xlsx
 ~$*.xls
+~$*.xlsm
+~$*.xlsb
+
+# CSV outputs (if you want to exclude)
+# results/*.csv
+# output/*.csv
 
 # R files (if using R)
 .Rhistory
@@ -238,14 +276,44 @@ config/credentials.yaml
 node_modules/
 
 # Specific project files to ignore
-# Add your specific files here
-# For example:
-# experimental_notebooks/
-# old_versions/
-# scratch/
+experimental_notebooks/
+old_versions/
+scratch/
+temp_analysis/
 
 # Keep these files/folders
 !.gitkeep
 !requirements.txt
 !README.md
 !setup.py
+!environment.yml
+
+# Keep placeholder files in empty directories
+!data/
+!data/*/
+!models/
+!reports/
+!results/
+
+# JSON files - be selective
+# Exclude large outputs and temporary files
+results/predictions/*.json
+results/predictions/*.csv
+results/experiments/*.json
+output/*.json
+temp/*.json
+cache/*.json
+*.tmp.json
+
+# Exclude sensitive data
+credentials.json
+secrets.json
+api_keys.json
+*_private.json
+
+# But KEEP configuration and metadata
+!config/*.json
+!models/feature_info.json
+!models/model_metadata.json
+!schemas/*.json
+!requirements.json

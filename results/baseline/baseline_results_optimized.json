@@ -1,0 +1,69 @@
+{
+    "without_leaky": {
+        "RandomForest": {
+            "train_f1": 0.7636932707355243,
+            "val_f1": 0.7395993836671803,
+            "cv_mean": 0.7549552585960978,
+            "cv_std": 0.01203210800714361,
+            "best_params": {
+                "n_estimators": 88,
+                "max_depth": 3,
+                "min_samples_split": 7,
+                "min_samples_leaf": 7,
+                "max_features": null,
+                "bootstrap": true
+            }
+        },
+        "MLP": {
+            "train_f1": 0.7613682092555332,
+            "val_f1": 0.7464566929133858,
+            "cv_mean": 0.7560956831822132,
+            "cv_std": 0.018673061848528252,
+            "best_params": {
+                "n_layers": 2,
+                "n_units_l0": 150,
+                "n_units_l1": 116,
+                "activation": "tanh",
+                "solver": "adam",
+                "alpha": 1.42856761240024e-05,
+                "learning_rate": "adaptive"
+            }
+        }
+    },
+    "with_leaky": {
+        "RandomForest": {
+            "train_f1": 0.8694481830417228,
+            "val_f1": 0.8505338078291815,
+            "cv_mean": 0.8286360847397564,
+            "cv_std": 0.014849731628598846,
+            "best_params": {
+                "n_estimators": 70,
+                "max_depth": 20,
+                "min_samples_split": 15,
+                "min_samples_leaf": 6,
+                "max_features": "sqrt",
+                "bootstrap": true
+            }
+        },
+        "MLP": {
+            "train_f1": 0.8450450450450451,
+            "val_f1": 0.8438061041292639,
+            "cv_mean": 0.8082656490246694,
+            "cv_std": 0.022424280460147723,
+            "best_params": {
+                "n_layers": 1,
+                "n_units_l0": 162,
+                "activation": "relu",
+                "solver": "adam",
+                "alpha": 0.0004102589542391925,
+                "learning_rate": "adaptive"
+            }
+        }
+    },
+    "optuna_trials": {
+        "RandomForest_no_leak": 50,
+        "RandomForest_with_leak": 50,
+        "MLP_no_leak": 50,
+        "MLP_with_leak": 50
+    }
+}

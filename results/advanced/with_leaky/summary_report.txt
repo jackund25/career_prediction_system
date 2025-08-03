@@ -1,0 +1,13 @@
+================================================================================
+ADVANCED MODEL TRAINING SUMMARY
+================================================================================
+Scenario: With leaky column
+Optuna trials: 50
+
+Validation Results:
+  xgboost: F1=0.8468
+  catboost: F1=0.8510
+  ensemble: F1=0.8429
+
+Best Model: Ensemble (Soft Voting)
+================================================================================

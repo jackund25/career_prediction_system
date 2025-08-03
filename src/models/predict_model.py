@@ -1,426 +1,483 @@
 """
-Module untuk melakukan prediksi menggunakan model yang sudah dilatih
+Prediction module for ensemble models
+Clean implementation for predicting alumni career alignment
 """
 
 import pandas as pd
 import numpy as np
-from pathlib import Path
-import json
 import joblib
+import json
 import logging
-from typing import Union, Dict, List, Tuple
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, Tuple, Optional
 import argparse
+import sys
+from pathlib import Path
+# Add parent directory to path
+sys.path.append(str(Path(__file__).parent.parent))
+
+# Then import features
+from features.build_features import TARGET_VARIABLE, TARGET_COLUMNS
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-# Import paths and modules
-import sys
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from src import MODELS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
-from src.features.build_features import FeatureEngineer, load_column_info
 
-
-class ModelPredictor:
-    """Class for making predictions with trained models"""
+class CareerPredictor:
+    """Main class for career alignment prediction"""
     
-    def __init__(self, model_path: str = None):
+    def __init__(self, model_scenario: str = 'without_leaky'):
         """
-        Initialize predictor
+        Initialize predictor with specified model scenario
         
         Args:
-            model_path: Path to model file. If None, uses final_model.pkl
+            model_scenario: 'without_leaky' or 'with_leaky'
         """
-        self.fe = FeatureEngineer()
-        self.model = None
-        self.preprocessor = None
-        self.label_encoder = None
-        self.metadata = None
+        self.model_scenario = model_scenario
+        self.models = {}
+        self.preprocessing = {}
         
-        # Load model and related artifacts
-        self._load_artifacts(model_path)
+        # Set paths
+        project_root = Path(__file__).parent.parent.parent
+        self.model_dir = project_root / 'models' / 'advanced' / model_scenario
+        self.results_dir = project_root / 'results' / 'predictions'
+        self.results_dir.mkdir(parents=True, exist_ok=True)
         
-    def _load_artifacts(self, model_path: str = None):
-        """Load model and related artifacts"""
+        # Load models and preprocessing
+        self._load_models()
+        
+        logger.info(f"CareerPredictor initialized with scenario: {model_scenario}")
+
+    def _load_models(self):
+        """Load all required models and preprocessing objects"""
+        print(f"Looking for models in: {self.model_dir}")
+        print(f"Directory exists: {self.model_dir.exists()}")
+        if self.model_dir.exists():
+            print(f"Files found: {list(self.model_dir.glob('*.pkl'))}")
         try:
-            # Load model
-            if model_path is None:
-                model_path = MODELS_DIR / 'final_model.pkl'
-            self.model = joblib.load(model_path)
-            logger.info(f"Loaded model from {model_path}")
+            # Load ensemble model (primary)
+            self.models['ensemble'] = joblib.load(self.model_dir / 'ensemble.pkl')
             
-            # Load preprocessor
-            preprocessor_path = MODELS_DIR / 'preprocessor.pkl'
-            self.preprocessor = joblib.load(preprocessor_path)
-            logger.info("Loaded preprocessor")
+            # Load individual models for comparison
+            self.models['xgboost'] = joblib.load(self.model_dir / 'xgboost.pkl')
+            self.models['catboost'] = joblib.load(self.model_dir / 'catboost.pkl')
             
-            # Load label encoder if exists
-            label_encoder_path = MODELS_DIR / 'label_encoder.pkl'
-            if label_encoder_path.exists():
-                self.label_encoder = joblib.load(label_encoder_path)
-                logger.info("Loaded label encoder")
+            # Load preprocessing
+            self.preprocessing['feature_engineer'] = joblib.load(self.model_dir / 'feature_engineer.pkl')
+            self.preprocessing['scaler'] = joblib.load(self.model_dir / 'scaler.pkl')
+            self.preprocessing['label_encoder'] = joblib.load(self.model_dir / 'label_encoder.pkl')
             
-            # Load metadata
-            metadata_path = MODELS_DIR / 'model_metadata.json'
-            if metadata_path.exists():
-                with open(metadata_path, 'r') as f:
-                    self.metadata = json.load(f)
-                logger.info(f"Loaded metadata - Best model: {self.metadata.get('best_model')}")
+            # Load feature info
+            feature_info_path = self.model_dir / 'feature_info.json'
+            if feature_info_path.exists():
+                with open(feature_info_path, 'r') as f:
+                    feature_info = json.load(f)
+                    self.feature_names = feature_info.get('feature_names', [])
+            else:
+                self.feature_names = []
+                logger.warning("Feature names not found")
             
-        except FileNotFoundError as e:
-            logger.error(f"Required file not found: {e}")
+            logger.info(f"Successfully loaded {len(self.models)} models")
+            
+        except Exception as e:
+            logger.error(f"Error loading models: {str(e)}")
             raise
-    
-    def prepare_data(self, data: Union[pd.DataFrame, str], 
-                    use_common_columns: bool = True,
-                    source_year: str = 'auto') -> pd.DataFrame:
+
+    def prepare_data(self, df: pd.DataFrame, is_2017_data: bool = True) -> Tuple[np.ndarray, pd.DataFrame, Optional[pd.Series], pd.DataFrame]:
         """
-        Prepare data for prediction with year-specific handling
+        Prepare data for prediction
         
         Args:
-            data: DataFrame or path to data file
-            use_common_columns: Whether to use only common columns
-            source_year: '2016', '2024', or 'auto' to detect format
+            df: Input DataFrame
+            is_2017_data: Whether this is 2017 format data
             
         Returns:
-            Prepared DataFrame
+            Tuple of (X_scaled, df_processed, original_target, df_input_with_target)
         """
-        # Load data if path is provided
-        if isinstance(data, str):
-            original_path = data
-            data = self._load_data(data)
-            # Auto-detect year from filename if possible
-            if source_year == 'auto' and '2016' in original_path:
-                source_year = '2016'
-            elif source_year == 'auto' and '2024' in original_path:
-                source_year = '2024'
         
-        # Standardize data format if needed
-        if source_year == '2016' or source_year == 'auto':
-            try:
-                from src.data.ensure_data_compatibility import DataCompatibilityChecker
-                checker = DataCompatibilityChecker()
-                data = checker.standardize_data(data, source_year)
-                logger.info(f"Standardized data from {source_year} format")
-            except ImportError:
-                logger.warning("DataCompatibilityChecker not found, proceeding without standardization")
-                # Manual handling for 2016 relationship column
-                rel_cols = [col for col in data.columns if 'hubungan bidang studi' in col.lower()]
-                if rel_cols:
-                    col = rel_cols[0]
-                    mapping = {
-                        'item1': 'sangat erat',
-                        'item2': 'erat',
-                        'item3': 'cukup erat',
-                        'item4': 'kurang erat',
-                        'item5': 'tidak sama sekali'
-                    }
-                    data[col] = data[col].map(mapping).fillna(data[col])
+        # Save original dataframe with target before any processing
+        df_input_with_target = df.copy() if TARGET_VARIABLE in df.columns else pd.DataFrame()
         
-        # Load column info if using common columns
-        common_columns = None
-        if use_common_columns:
-            column_info = load_column_info()
-            if column_info:
-                common_columns = column_info.get('common_columns', None)
-                logger.info(f"Using {len(common_columns)} common columns")
+        # Process features FIRST (this includes filtering)
+        df_processed = self.preprocessing['feature_engineer'].process_features(
+            df,
+            common_columns=TARGET_COLUMNS,
+            is_training=False,
+            is_2017_data=is_2017_data
+        )
         
-        # Process features
-        df_processed = self.fe.process_features(data, common_columns=common_columns, is_training=False)
+        # Check for target column AFTER processing/filtering
+        original_target = None
+        if 'target' in df_processed.columns:
+            original_target = df_processed['target'].copy()
+            logger.info(f"Found target column after processing. Distribution:\n{original_target.value_counts(dropna=False)}")
         
-        # Remove target column if it exists
-        target_candidates = ['Lulus_label', 'lulus', 'label', 'target']
-        for col in target_candidates:
-            if col in df_processed.columns:
-                df_processed = df_processed.drop(columns=[col])
-                logger.info(f"Removed target column: {col}")
+        # Get numeric features
+        numeric_cols = df_processed.select_dtypes(include=[np.number]).columns.tolist()
+        feature_cols = [col for col in numeric_cols if col not in ['target', 'NIM']]
         
-        # Handle missing columns that preprocessor expects
-        if hasattr(self.preprocessor, 'feature_names_in_'):
-            expected_cols = self.preprocessor.feature_names_in_
-            missing_cols = set(expected_cols) - set(df_processed.columns)
+        # Align with training features
+        if self.feature_names:
+            missing_features = set(self.feature_names) - set(feature_cols)
+            if missing_features:
+                logger.warning(f"Adding {len(missing_features)} missing features with zeros")
+                for feat in missing_features:
+                    df_processed[feat] = 0
             
-            if missing_cols:
-                logger.warning(f"Missing {len(missing_cols)} columns expected by preprocessor")
-                # Add missing columns with default values
-                for col in missing_cols:
-                    if '_numeric' in col:
-                        # For numeric columns from ordinal features, use median value (3)
-                        df_processed[col] = 3
-                    elif any(cat in col for cat in ['_encoded', '_']):
-                        # For encoded categorical columns, use 0
-                        df_processed[col] = 0
-                    else:
-                        # For other columns, use appropriate default
-                        df_processed[col] = 'unknown'
-                
-                logger.info(f"Added {len(missing_cols)} missing columns with default values")
-        
-        # Ensure column order matches what preprocessor expects
-        if hasattr(self.preprocessor, 'feature_names_in_'):
-            df_processed = df_processed[self.preprocessor.feature_names_in_]
-        
-        return df_processed
-    
-    def _load_data(self, filepath: str) -> pd.DataFrame:
-        """Load data from file"""
-        filepath = Path(filepath)
-        
-        if filepath.suffix == '.csv':
-            df = pd.read_csv(filepath)
-        elif filepath.suffix in ['.xlsx', '.xls']:
-            df = pd.read_excel(filepath)
+            X = df_processed[self.feature_names]
         else:
-            raise ValueError(f"Unsupported file format: {filepath.suffix}")
+            X = df_processed[feature_cols]
         
-        logger.info(f"Loaded data from {filepath}: {df.shape}")
-        return df
-    
-    def predict(self, data: Union[pd.DataFrame, str], 
-               return_proba: bool = True) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+        # Scale features
+        X_scaled = self.preprocessing['scaler'].transform(X.values)
+        
+        logger.info(f"Prepared {X_scaled.shape[0]} samples with {X_scaled.shape[1]} features")
+        
+        return X_scaled, df_processed, original_target, df_input_with_target
+
+    def predict(self, df: pd.DataFrame, is_2017_data: bool = True) -> pd.DataFrame:
         """
-        Make predictions
+        Make predictions on input data
         
         Args:
-            data: DataFrame or path to data file
-            return_proba: Whether to return probabilities
+            df: Input DataFrame
+            is_2017_data: Whether this is 2017 format data
             
         Returns:
-            Predictions (and probabilities if requested)
+            DataFrame with predictions and metadata
         """
         # Prepare data
-        X = self.prepare_data(data)
-        
-        # Transform using preprocessor
-        X_transformed = self.preprocessor.transform(X)
-        logger.info(f"Transformed data shape: {X_transformed.shape}")
+        X_scaled, df_processed, original_target, df_input_with_target = self.prepare_data(df, is_2017_data)
         
         # Make predictions
-        y_pred = self.model.predict(X_transformed)
+        predictions = pd.DataFrame()
         
-        # Decode labels if label encoder exists
-        if self.label_encoder:
-            y_pred_decoded = self.label_encoder.inverse_transform(y_pred)
-        else:
-            y_pred_decoded = y_pred
+        # Add NIM if available
+        if 'NIM' in df_processed.columns:
+            predictions['NIM'] = df_processed['NIM'].values
         
-        if return_proba:
-            y_proba = self.model.predict_proba(X_transformed)
-            return y_pred_decoded, y_proba
+        # Ensemble predictions (primary)
+        ensemble_pred = self.models['ensemble'].predict(X_scaled)
+        ensemble_proba = self.models['ensemble'].predict_proba(X_scaled)
         
-        return y_pred_decoded
-    
-    def predict_and_save(self, data: Union[pd.DataFrame, str], 
-                        output_path: str = None) -> pd.DataFrame:
-        """
-        Make predictions and save results
+        # Get probabilities for both classes
+        predictions['prediction'] = self.preprocessing['label_encoder'].inverse_transform(ensemble_pred)
+        predictions['probability_tidak'] = ensemble_proba[:, 0]  # Probability for class "tidak"
+        predictions['probability_ya'] = ensemble_proba[:, 1]     # Probability for class "ya"
+        predictions['confidence'] = np.maximum(ensemble_proba[:, 0], ensemble_proba[:, 1])
         
-        Args:
-            data: DataFrame or path to data file
-            output_path: Path to save results. If None, saves to processed data dir
+        # Individual model predictions for comparison
+        xgb_pred = self.models['xgboost'].predict(X_scaled)
+        cat_pred = self.models['catboost'].predict(X_scaled)
+        
+        predictions['xgboost_agrees'] = (xgb_pred == ensemble_pred).astype(int)
+        predictions['catboost_agrees'] = (cat_pred == ensemble_pred).astype(int)
+        predictions['model_agreement'] = predictions[['xgboost_agrees', 'catboost_agrees']].sum(axis=1) + 1  # +1 for ensemble itself
+        
+        # Add metadata
+        predictions['model_scenario'] = self.model_scenario
+        predictions['prediction_date'] = datetime.now().strftime('%m/%d/%Y %H:%M')
+        
+        # Add original target if available (for evaluation) - this is the filtered target
+        if original_target is not None:
+            predictions['actual_target'] = original_target.values
             
-        Returns:
-            DataFrame with predictions
-        """
-        # Load original data for reference
-        if isinstance(data, str):
-            df_original = self._load_data(data)
-        else:
-            df_original = data.copy()
+            # Calculate metrics for valid targets only
+            mask_valid = predictions['actual_target'].notna()
+            if mask_valid.sum() > 0:
+                valid_actual = predictions.loc[mask_valid, 'actual_target']
+                valid_pred = predictions.loc[mask_valid, 'prediction']
+                
+                accuracy = (valid_actual == valid_pred).mean()
+                logger.info(f"Accuracy on {mask_valid.sum()} valid samples: {accuracy:.4f}")
         
-        # Make predictions
-        predictions, probabilities = self.predict(data, return_proba=True)
+        # Add original target column from input data using NIM mapping
+        if not df_input_with_target.empty and 'NIM' in predictions.columns and 'NIM' in df_input_with_target.columns:
+            # Create mapping from NIM to original target
+            nim_to_target = df_input_with_target.set_index('NIM')[TARGET_VARIABLE].to_dict()
+            
+            # Map target values
+            predictions['target'] = predictions['NIM'].map(nim_to_target)
+            
+            logger.info(f"Added original target column for {predictions['target'].notna().sum()} samples")
         
-        # Create results dataframe
-        results = df_original.copy()
-        results['prediction'] = predictions
+        # Summary statistics
+        pred_dist = predictions['prediction'].value_counts()
+        logger.info(f"Prediction distribution:\n{pred_dist}")
+        logger.info(f"Average confidence: {predictions['confidence'].mean():.4f}")
         
-        # Add probabilities
-        if probabilities.shape[1] == 2:
-            # Binary classification
-            results['probability_class_0'] = probabilities[:, 0]
-            results['probability_class_1'] = probabilities[:, 1]
-            results['confidence'] = np.max(probabilities, axis=1)
-        else:
-            # Multi-class
-            for i in range(probabilities.shape[1]):
-                results[f'probability_class_{i}'] = probabilities[:, i]
-            results['confidence'] = np.max(probabilities, axis=1)
-        
-        # Save results
-        if output_path is None:
-            output_path = PROCESSED_DATA_DIR / 'predictions.csv'
-        else:
-            output_path = Path(output_path)
-        
-        results.to_csv(output_path, index=False)
-        logger.info(f"Saved predictions to {output_path}")
-        
-        # Print summary
-        print("\n=== Prediction Summary ===")
-        print(f"Total predictions: {len(predictions)}")
-        print(f"\nPrediction distribution:")
-        print(pd.Series(predictions).value_counts())
-        print(f"\nAverage confidence: {results['confidence'].mean():.3f}")
-        
-        return results
+        return predictions
     
-    def evaluate_on_test_data(self, test_data: Union[pd.DataFrame, str]) -> Dict:
+    def evaluate_predictions(self, predictions: pd.DataFrame) -> Dict:
         """
-        Evaluate model on test data with known labels
+        Evaluate predictions if actual target is available
         
         Args:
-            test_data: DataFrame or path to test data with labels
+            predictions: DataFrame with predictions and actual_target column
             
         Returns:
             Dictionary with evaluation metrics
         """
-        from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, classification_report, confusion_matrix
+        if 'actual_target' not in predictions.columns:
+            logger.warning("No actual target found for evaluation")
+            return {}
         
-        # Load data
-        if isinstance(test_data, str):
-            df_test = self._load_data(test_data)
-        else:
-            df_test = test_data.copy()
+        # Filter valid targets
+        mask_valid = predictions['actual_target'].notna()
+        valid_data = predictions[mask_valid].copy()
         
-        # Find target column
-        target_col = None
-        target_candidates = ['Lulus_label', 'lulus', 'label', 'target']
-        for col in target_candidates:
-            if col in df_test.columns:
-                target_col = col
-                break
+        if len(valid_data) == 0:
+            logger.warning("No valid targets for evaluation")
+            return {}
         
-        if not target_col:
-            raise ValueError("Target column not found in test data")
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
         
-        # Separate features and target
-        y_true = df_test[target_col]
+        # Encode for metrics
+        y_true = self.preprocessing['label_encoder'].transform(valid_data['actual_target'])
+        y_pred = self.preprocessing['label_encoder'].transform(valid_data['prediction'])
         
-        # Encode target if necessary
-        if y_true.dtype == 'object' and self.label_encoder:
-            y_true_encoded = self.label_encoder.transform(y_true)
-        else:
-            y_true_encoded = y_true
-        
-        # Make predictions
-        y_pred, y_proba = self.predict(df_test, return_proba=True)
-        
-        # Encode predictions for comparison if necessary
-        if y_pred.dtype == 'object' and self.label_encoder:
-            y_pred_encoded = self.label_encoder.transform(y_pred)
-        else:
-            y_pred_encoded = y_pred
-        
-        # Calculate metrics
         metrics = {
-            'accuracy': accuracy_score(y_true_encoded, y_pred_encoded),
-            'f1_score': f1_score(y_true_encoded, y_pred_encoded, average='weighted'),
-            'roc_auc': roc_auc_score(y_true_encoded, y_proba[:, 1]) if y_proba.shape[1] == 2 else None
+            'n_evaluated': int(len(valid_data)),
+            'n_total': int(len(predictions)),
+            'n_missing': int((~mask_valid).sum()),
+            'accuracy': float(accuracy_score(y_true, y_pred)),
+            'precision': float(precision_score(y_true, y_pred, average='binary')),
+            'recall': float(recall_score(y_true, y_pred, average='binary')),
+            'f1_score': float(f1_score(y_true, y_pred, average='binary')),
+            'confusion_matrix': confusion_matrix(y_true, y_pred).tolist()
         }
         
-        # Print evaluation results
-        print("\n=== Model Evaluation Results ===")
-        print(f"Accuracy: {metrics['accuracy']:.4f}")
-        print(f"F1-Score: {metrics['f1_score']:.4f}")
-        if metrics['roc_auc']:
-            print(f"ROC-AUC: {metrics['roc_auc']:.4f}")
-        
-        print("\nClassification Report:")
-        print(classification_report(y_true, y_pred))
-        
-        print("\nConfusion Matrix:")
+        # Add class-wise metrics
         cm = confusion_matrix(y_true, y_pred)
-        print(cm)
+        metrics['true_negatives'] = int(cm[0, 0])
+        metrics['false_positives'] = int(cm[0, 1])
+        metrics['false_negatives'] = int(cm[1, 0])
+        metrics['true_positives'] = int(cm[1, 1])
+        
+        logger.info(f"Evaluation complete: F1={metrics['f1_score']:.4f}, Accuracy={metrics['accuracy']:.4f}")
         
         return metrics
+    
+    def save_predictions(self, predictions: pd.DataFrame, filename: Optional[str] = None):
+        """Save predictions to file and always create JSON metrics"""
+        if filename is None:
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f'predictions_{self.model_scenario}_{timestamp}.csv'
+        
+        filepath = self.results_dir / filename
+        predictions.to_csv(filepath, index=False)
+        logger.info(f"Predictions saved to {filepath}")
+        
+        # Always create JSON file with prediction summary
+        metrics = {}
+        
+        # Check if we have actual target for evaluation
+        if 'actual_target' in predictions.columns:
+            # Full evaluation metrics
+            metrics = self.evaluate_predictions(predictions)
+        else:
+            # Basic prediction summary when no target available
+            metrics = {
+                'n_total': int(len(predictions)),
+                'n_evaluated': 0,
+                'n_missing': int(len(predictions)),
+                'model_scenario': self.model_scenario,
+                'prediction_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'predictions_distribution': predictions['prediction'].value_counts().to_dict(),
+                'average_confidence': float(predictions['confidence'].mean()),
+                'confidence_stats': {
+                    'mean': float(predictions['confidence'].mean()),
+                    'std': float(predictions['confidence'].std()),
+                    'min': float(predictions['confidence'].min()),
+                    'max': float(predictions['confidence'].max()),
+                    'median': float(predictions['confidence'].median())
+                },
+                'model_agreement_stats': {
+                    'all_models_agree': int((predictions['model_agreement'] == 3).sum()),
+                    'two_models_agree': int((predictions['model_agreement'] == 2).sum()),
+                    'only_ensemble': int((predictions['model_agreement'] == 1).sum()),
+                    'agreement_percentage': float((predictions['model_agreement'] == 3).sum() / len(predictions) * 100)
+                }
+            }
+            
+            # Add probability distribution stats
+            if 'probability_ya' in predictions.columns:
+                metrics['probability_ya_stats'] = {
+                    'mean': float(predictions['probability_ya'].mean()),
+                    'std': float(predictions['probability_ya'].std()),
+                    'min': float(predictions['probability_ya'].min()),
+                    'max': float(predictions['probability_ya'].max()),
+                    'median': float(predictions['probability_ya'].median())
+                }
+            
+            logger.info("No actual target found - creating summary metrics only")
+        
+        # Always save JSON file
+        metrics_file = filepath.with_suffix('.json')
+        with open(metrics_file, 'w') as f:
+            json.dump(metrics, f, indent=4)
+        logger.info(f"Metrics saved to {metrics_file}")
+        
+        # Print summary
+        print(f"\nMetrics saved to: {metrics_file}")
+        if 'accuracy' in metrics:
+            print(f"Evaluation metrics available (accuracy: {metrics['accuracy']:.2%})")
+        else:
+            print("Prediction summary saved (no target data for evaluation)")
 
-
-def make_prediction(dataframe: pd.DataFrame, 
-                   model_path: str = None,
-                   use_common_columns: bool = True) -> Tuple[np.ndarray, np.ndarray]:
+def predict_alumni_batch(data_path: str, model_scenario: str = 'without_leaky', 
+                        output_file: Optional[str] = None):
     """
-    Convenience function for making predictions
+    Convenience function to predict on a batch of alumni data
     
     Args:
-        dataframe: Input dataframe
-        model_path: Path to model file
-        use_common_columns: Whether to use only common columns
-        
-    Returns:
-        Tuple of (predictions, probabilities)
+        data_path: Path to data file (CSV or Excel)
+        model_scenario: Which model to use ('without_leaky' or 'with_leaky')
+        output_file: Optional output filename
     """
-    predictor = ModelPredictor(model_path)
-    predictions, probabilities = predictor.predict(dataframe, return_proba=True)
-    return predictions, probabilities
-
-
-def predict_2016_data():
-    """Specific function to predict on 2016 data"""
-    logger.info("Predicting on 2016 data...")
+    # Load data
+    if data_path.endswith('.csv'):
+        df = pd.read_csv(data_path)
+    elif data_path.endswith(('.xlsx', '.xls')):
+        df = pd.read_excel(data_path)
+    else:
+        raise ValueError(f"Unsupported file format: {data_path}")
+    
+    logger.info(f"Loaded data: {df.shape}")
     
     # Initialize predictor
-    predictor = ModelPredictor()
+    predictor = CareerPredictor(model_scenario=model_scenario)
     
-    # Load 2016 data
-    data_2016_path = RAW_DATA_DIR / 'data 2016 - daffari_raw.csv'
+    # Make predictions
+    predictions = predictor.predict(df)
     
-    # Make predictions and save
-    results = predictor.predict_and_save(
-        str(data_2016_path),
-        output_path=PROCESSED_DATA_DIR / 'predictions_2016.csv'
-    )
+    # Save results
+    predictor.save_predictions(predictions, output_file)
     
-    # If 2016 data has labels, evaluate
-    try:
-        metrics = predictor.evaluate_on_test_data(str(data_2016_path))
+    # Print summary
+    print("\n" + "="*60)
+    print("PREDICTION SUMMARY")
+    print("="*60)
+    print(f"Model scenario: {model_scenario}")
+    print(f"Total samples: {len(predictions)}")
+    print(f"\nPrediction distribution:")
+    print(predictions['prediction'].value_counts())
+    print(f"\nAverage confidence: {predictions['confidence'].mean():.2%}")
+    
+    if 'actual_target' in predictions.columns:
+        metrics = predictor.evaluate_predictions(predictions)
+        if metrics:
+            print(f"\nEvaluation metrics (on {metrics['n_evaluated']} valid samples):")
+            print(f"  Accuracy: {metrics['accuracy']:.2%}")
+            print(f"  F1 Score: {metrics['f1_score']:.4f}")
+            print(f"  Precision: {metrics['precision']:.4f}")
+            print(f"  Recall: {metrics['recall']:.4f}")
+    
+    return predictions
+
+
+def compare_model_scenarios(data_path: str):
+    """
+    Compare predictions between with/without leaky column scenarios
+    
+    Args:
+        data_path: Path to data file
+    """
+    print("\n" + "="*80)
+    print("COMPARING MODEL SCENARIOS")
+    print("="*80)
+    
+    results = {}
+    
+    # Run predictions for both scenarios
+    for scenario in ['without_leaky', 'with_leaky']:
+        print(f"\n--- Scenario: {scenario} ---")
+        predictor = CareerPredictor(model_scenario=scenario)
         
-        # Save evaluation metrics
-        with open(PROCESSED_DATA_DIR / 'evaluation_2016.json', 'w') as f:
-            json.dump(metrics, f, indent=2)
+        # Load data fresh for each scenario
+        if data_path.endswith('.csv'):
+            df = pd.read_csv(data_path)
+        else:
+            df = pd.read_excel(data_path)
         
-        logger.info("Evaluation completed and saved")
-    except ValueError as e:
-        logger.warning(f"Could not evaluate: {e}")
+        predictions = predictor.predict(df)
+        results[scenario] = predictions
+        
+        # Save scenario results
+        predictor.save_predictions(predictions, f'comparison_{scenario}.csv')
     
-    return results
+    # Compare predictions
+    comparison = pd.DataFrame({
+        'NIM': results['without_leaky']['NIM'] if 'NIM' in results['without_leaky'].columns else range(len(results['without_leaky'])),
+        'pred_without_leaky': results['without_leaky']['prediction'],
+        'prob_without_leaky': results['without_leaky']['probability'],
+        'pred_with_leaky': results['with_leaky']['prediction'],
+        'prob_with_leaky': results['with_leaky']['probability'],
+        'same_prediction': results['without_leaky']['prediction'] == results['with_leaky']['prediction']
+    })
+    
+    # Add actual target if available
+    if 'actual_target' in results['without_leaky'].columns:
+        comparison['actual_target'] = results['without_leaky']['actual_target']
+    
+    # Calculate agreement
+    agreement_rate = comparison['same_prediction'].mean()
+    
+    print(f"\n--- Comparison Results ---")
+    print(f"Agreement rate: {agreement_rate:.2%}")
+    print(f"Disagreements: {(~comparison['same_prediction']).sum()} samples")
+    
+    # Save comparison
+    project_root = Path(__file__).parent.parent.parent
+    comparison_path = project_root / 'results' / 'predictions' / 'scenario_comparison.csv'
+    comparison.to_csv(comparison_path, index=False)
+    
+    # Show some disagreement cases
+    if (~comparison['same_prediction']).sum() > 0:
+        print("\nSample disagreement cases:")
+        disagreements = comparison[~comparison['same_prediction']].head(10)
+        print(disagreements[['pred_without_leaky', 'pred_with_leaky', 'prob_without_leaky', 'prob_with_leaky']])
+    
+    return comparison
 
 
 def main():
-    """Main function with CLI interface"""
-    parser = argparse.ArgumentParser(description='Make predictions using trained model')
-    parser.add_argument('--input', type=str, help='Path to input data file')
-    parser.add_argument('--output', type=str, help='Path to save predictions')
-    parser.add_argument('--model', type=str, help='Path to model file (default: final_model.pkl)')
-    parser.add_argument('--evaluate', action='store_true', help='Evaluate if test data has labels')
-    parser.add_argument('--predict-2016', action='store_true', help='Predict on 2016 data')
+    """Main entry point for command line usage"""
+    parser = argparse.ArgumentParser(description='Predict alumni career alignment')
+    parser.add_argument('data_path', type=str, help='Path to alumni data file')
+    parser.add_argument('--scenario', type=str, default='without_leaky',
+                       choices=['without_leaky', 'with_leaky'],
+                       help='Model scenario to use (default: without_leaky)')
+    parser.add_argument('--compare', action='store_true',
+                       help='Compare both model scenarios')
+    parser.add_argument('--output', type=str, default=None,
+                       help='Output filename for predictions')
     
     args = parser.parse_args()
     
-    if args.predict_2016:
-        # Predict on 2016 data
-        results = predict_2016_data()
-        print(f"\nPredictions saved for {len(results)} samples")
-        
-    elif args.input:
-        # Initialize predictor
-        predictor = ModelPredictor(args.model)
-        
-        if args.evaluate:
-            # Evaluate on test data
-            metrics = predictor.evaluate_on_test_data(args.input)
-            print("\nEvaluation completed")
-        else:
-            # Make predictions
-            results = predictor.predict_and_save(args.input, args.output)
-            print(f"\nPredictions saved for {len(results)} samples")
+    if args.compare:
+        # Run comparison
+        compare_model_scenarios(args.data_path)
     else:
-        print("Usage examples:")
-        print("  python predict_model.py --predict-2016")
-        print("  python predict_model.py --input data.csv --output predictions.csv")
-        print("  python predict_model.py --input test_data.csv --evaluate")
+        # Single prediction
+        predict_alumni_batch(args.data_path, args.scenario, args.output)
 
 
 if __name__ == "__main__":
-    main()
+    
+    # If running directly, use example
+    if len(sys.argv) > 1:
+        main()
+    else:
+        # Example usage
+        print("Example usage:")
+        print("python predict_models.py data/01_raw/DATA TS SARJANA 2024.xlsx")
+        print("python predict_models.py data/01_raw/DATA TS SARJANA 2024.xlsx --compare")
+        print("\nOr use in Python:")
+        print("from predict_models import predict_alumni_batch")
+        print("predictions = predict_alumni_batch('path/to/data.xlsx')")

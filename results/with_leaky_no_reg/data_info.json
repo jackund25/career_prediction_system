@@ -1,0 +1,22 @@
+{
+    "n_train_samples": 1937,
+    "n_val_samples": 485,
+    "n_test_samples": 3234,
+    "n_features": 12,
+    "feature_names": [
+        "technical_x_relationship",
+        "IP",
+        "ip_numeric",
+        "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]",
+        "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]_numeric",
+        "program_studi_clean_encoded",
+        "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]",
+        "ip_x_org_active",
+        "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]_numeric",
+        "job_category_encoded",
+        "relationship_level_ordinal",
+        "is_technical"
+    ],
+    "include_leaky_column": true,
+    "leaky_column_included": false
+}

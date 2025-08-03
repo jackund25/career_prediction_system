@@ -1,10 +1,11 @@
 """
 Module untuk feature engineering dengan mapping kategori yang lebih komprehensif
+Updated with column filtering and data leakage control
 """
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Optional
 import logging
 from pathlib import Path
 import json
@@ -14,7 +15,36 @@ import re
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ===== KONSTANTA KATEGORI =====
+# ===== KONSTANTA KOLOM TARGET =====
+# 12 kolom yang akan digunakan untuk kedua dataset
+TARGET_COLUMNS = [
+    'NIM',
+    'Program Studi',
+    'IP',
+    'Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?',
+    'Seberapa erat hubungan bidang studi dengan pekerjaan Anda?',
+    'Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]',
+    'Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]',
+    'Bidang usaha bekerja',
+    'Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)',
+    'Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!',
+    'Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!',
+    'Jelaskan tugas-tugas utama dalam pekerjaan Anda saat ini?'
+]
+
+# Kolom status pekerjaan
+EMPLOYMENT_STATUS_COLUMN = 'Pekerjaan utama saat ini?'
+
+# Nilai status pekerjaan yang diterima (alumni yang bekerja)
+WORKING_STATUS_VALUES = ['Bekerja', 'Bekerja dan wiraswasta']
+
+# Kolom yang berpotensi leaky
+LEAKY_COLUMN = 'Seberapa erat hubungan bidang studi dengan pekerjaan Anda?'
+
+# Target variable
+TARGET_VARIABLE = 'Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?'
+
+# ===== KONSTANTA KATEGORI (existing constants remain the same) =====
 
 # 1. Program Studi - 45 values
 PROGRAM_STUDI_VALUES = [
@@ -213,11 +243,61 @@ DEFAULT_VALUES = {
 
 
 class FeatureEngineer:
-    """Class untuk melakukan feature engineering"""
+    """Class untuk melakukan feature engineering dengan kontrol data leakage"""
     
-    def __init__(self):
-        """Initialize feature engineer"""
+    def __init__(self, include_leaky_column: bool = True):
+        """
+        Initialize feature engineer
+        
+        Args:
+            include_leaky_column: Whether to include the potentially leaky column
+        """
+        self.include_leaky_column = include_leaky_column
         self.feature_mappings = self._load_feature_mappings()
+        
+        logger.info(f"Feature Engineer initialized with include_leaky_column={include_leaky_column}")
+
+    def filter_working_alumni(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Filter dataframe to only include alumni who are working
+        
+        Args:
+            df: Input DataFrame
+            
+        Returns:
+            DataFrame filtered to only working alumni
+        """
+        # Check if employment status column exists
+        if EMPLOYMENT_STATUS_COLUMN not in df.columns:
+            logger.warning(f"Employment status column '{EMPLOYMENT_STATUS_COLUMN}' not found in dataframe")
+            logger.warning("Available columns: " + ", ".join(df.columns))
+            logger.warning("Returning original dataframe without filtering")
+            return df
+        
+        # Get initial count
+        initial_count = len(df)
+        
+        # Filter for working alumni
+        df_filtered = df[df[EMPLOYMENT_STATUS_COLUMN].isin(WORKING_STATUS_VALUES)].copy()
+        
+        # Get final count
+        final_count = len(df_filtered)
+        
+        # Log filtering results
+        logger.info(f"Filtered alumni by employment status:")
+        logger.info(f"  - Initial count: {initial_count}")
+        logger.info(f"  - Final count (working alumni): {final_count}")
+        logger.info(f"  - Removed: {initial_count - final_count}")
+        logger.info(f"  - Retention rate: {final_count/initial_count*100:.1f}%")
+        
+        # Show distribution of employment status in original data
+        if EMPLOYMENT_STATUS_COLUMN in df.columns:
+            logger.info(f"\nEmployment status distribution (before filtering):")
+            status_counts = df[EMPLOYMENT_STATUS_COLUMN].value_counts()
+            for status, count in status_counts.items():
+                logger.info(f"  - {status}: {count} ({count/initial_count*100:.1f}%)")
+        
+        return df_filtered
         
     def _load_feature_mappings(self) -> Dict:
         """Load feature mappings dari konstanta"""
@@ -234,6 +314,51 @@ class FeatureEngineer:
             'defaults': DEFAULT_VALUES
         }
         return mappings
+    
+    def filter_target_columns(self, df: pd.DataFrame, is_2017_data: bool = False) -> pd.DataFrame:
+        """
+        Filter dataframe to only include the 12 target columns
+        
+        Args:
+            df: Input DataFrame
+            is_2017_data: Whether this is 2017 data (which needs column name mapping)
+            
+        Returns:
+            DataFrame with only target columns
+        """
+        df_filtered = pd.DataFrame()
+        
+        # Column name mappings for 2017 data (if column names are different)
+        column_mappings_2017 = {
+            # Add any column name mappings here if 2017 data has different names
+            # Example: 'Old Name': 'New Name'
+        }
+        
+        # Apply column name mappings if this is 2017 data
+        if is_2017_data and column_mappings_2017:
+            df = df.rename(columns=column_mappings_2017)
+        
+        # Get columns to use (exclude leaky column if specified)
+        columns_to_use = TARGET_COLUMNS.copy()
+        if not self.include_leaky_column and LEAKY_COLUMN in columns_to_use:
+            columns_to_use.remove(LEAKY_COLUMN)
+            logger.info(f"Excluded leaky column: {LEAKY_COLUMN}")
+        
+        # Select only columns that exist
+        missing_columns = []
+        for col in columns_to_use:
+            if col in df.columns:
+                df_filtered[col] = df[col]
+            else:
+                missing_columns.append(col)
+        
+        if missing_columns:
+            logger.warning(f"Missing columns: {missing_columns}")
+            
+        logger.info(f"Filtered to {len(df_filtered.columns)} columns out of {len(df.columns)} original columns")
+        logger.info(f"Selected columns: {list(df_filtered.columns)}")
+        
+        return df_filtered
     
     def clean_text(self, text: str) -> str:
         """Clean text data"""
@@ -308,6 +433,11 @@ class FeatureEngineer:
         Returns:
             DataFrame dengan kolom relationship_level
         """
+        # Skip if leaky column is excluded
+        if not self.include_leaky_column:
+            logger.info("Skipping relationship level mapping (leaky column excluded)")
+            return df
+            
         if col_name is None:
             possible_names = ['Seberapa erat hubungan bidang studi dengan pekerjaan Anda?',
                             'hubungan_bidang_studi', 'relationship']
@@ -416,7 +546,8 @@ class FeatureEngineer:
             DataFrame dengan kolom job_category
         """
         if col_name is None:
-            possible_names = ['pekerjaan', 'Pekerjaan', 'job', 'Job']
+            possible_names = ['Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!',
+                            'pekerjaan', 'Pekerjaan', 'job', 'Job']
             for name in possible_names:
                 if name in df.columns:
                     col_name = name
@@ -463,7 +594,7 @@ class FeatureEngineer:
             DataFrame dengan kolom organization_category
         """
         if col_name is None:
-            possible_names = ['Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan?',
+            possible_names = ['Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)',
                             'organisasi', 'Organisasi']
             for name in possible_names:
                 if name in df.columns:
@@ -571,7 +702,7 @@ class FeatureEngineer:
             DataFrame dengan kolom activity_type
         """
         if col_name is None:
-            possible_names = ['Sebutkan jenis kegiatan di organisasi yang aktif diikuti',
+            possible_names = ['Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!',
                             'kegiatan_organisasi', 'kegiatan', 'Kegiatan']
             for name in possible_names:
                 if name in df.columns:
@@ -662,15 +793,24 @@ class FeatureEngineer:
         """
         df = df.copy()
         
-        # Interaction between program studi match and relationship level
-        if 'relationship_level_ordinal' in df.columns and 'program_studi_clean' in df.columns:
-            # Create binary feature for technical program
-            tech_programs = ['Teknik', 'Informatika', 'Sistem']
-            df['is_technical'] = df['program_studi_clean'].apply(
-                lambda x: 1 if any(tech in x for tech in tech_programs) else 0
-            )
-            
-            df['technical_x_relationship'] = df['is_technical'] * df['relationship_level_ordinal']
+        # Only create relationship-based interactions if leaky column is included
+        if self.include_leaky_column:
+            # Interaction between program studi match and relationship level
+            if 'relationship_level_ordinal' in df.columns and 'program_studi_clean' in df.columns:
+                # Create binary feature for technical program
+                tech_programs = ['Teknik', 'Informatika', 'Sistem']
+                df['is_technical'] = df['program_studi_clean'].apply(
+                    lambda x: 1 if any(tech in x for tech in tech_programs) else 0
+                )
+                
+                df['technical_x_relationship'] = df['is_technical'] * df['relationship_level_ordinal']
+        else:
+            # Create technical program feature without relationship interaction
+            if 'program_studi_clean' in df.columns:
+                tech_programs = ['Teknik', 'Informatika', 'Sistem']
+                df['is_technical'] = df['program_studi_clean'].apply(
+                    lambda x: 1 if any(tech in x for tech in tech_programs) else 0
+                )
         
         # Interaction between IP and organization participation
         if 'ip_numeric' in df.columns and 'organization_category' in df.columns:
@@ -706,6 +846,10 @@ class FeatureEngineer:
                 'ip_category': DEFAULT_VALUES['ip'],
                 'relationship_level': DEFAULT_VALUES['relationship']
             }
+            
+            # Skip relationship_level if leaky column is excluded
+            if not self.include_leaky_column and 'relationship_level' in categorical_defaults:
+                del categorical_defaults['relationship_level']
             
             for col, default_val in categorical_defaults.items():
                 if col in df.columns:
@@ -761,6 +905,10 @@ class FeatureEngineer:
             # One-hot encoding untuk low cardinality
             onehot_encode_cols = ['bidang_usaha_clean', 'organization_category', 
                                  'activity_type', 'ip_category']
+            
+            # Skip relationship features if leaky column excluded
+            if self.include_leaky_column:
+                onehot_encode_cols.append('relationship_level')
             
             # Label encoding
             from sklearn.preprocessing import LabelEncoder
@@ -874,19 +1022,25 @@ class FeatureEngineer:
         # Also include engineered features if they exist
         engineered_features = [
             'program_studi_clean', 'program_studi_clean_encoded',
-            'relationship_level', 'relationship_level_ordinal',
             'bidang_usaha_clean', 'bidang_usaha_clean_encoded',
             'job_category', 'job_category_encoded',
             'organization_category', 'activity_type',
             'ip_category', 'ip_numeric',
-            'technical_x_relationship', 'ip_x_org_active',
-            'is_technical', 'target'
+            'ip_x_org_active', 'is_technical', 'target'
         ]
+        
+        # Add relationship features only if leaky column is included
+        if self.include_leaky_column:
+            engineered_features.extend(['relationship_level', 'relationship_level_ordinal',
+                                      'technical_x_relationship'])
         
         # Add one-hot encoded columns
         for col in df.columns:
             if any(prefix in col for prefix in ['bidang_usaha_clean_', 'organization_category_', 
                                                 'activity_type_', 'ip_category_']):
+                engineered_features.append(col)
+            # Add relationship one-hot only if included
+            if self.include_leaky_column and 'relationship_level_' in col:
                 engineered_features.append(col)
         
         # Add ordinal columns
@@ -905,7 +1059,9 @@ class FeatureEngineer:
     
     def process_features(self, df: pd.DataFrame, 
                         common_columns: List[str] = None,
-                        is_training: bool = True) -> pd.DataFrame:
+                        is_training: bool = True,
+                        is_2017_data: bool = False,
+                        filter_working: bool = True) -> pd.DataFrame:
         """
         Main function untuk process semua features
         
@@ -913,12 +1069,23 @@ class FeatureEngineer:
             df: DataFrame input
             common_columns: List of common columns to use
             is_training: Whether this is training data
+            is_2017_data: Whether this is 2017 data
             
         Returns:
             Processed DataFrame
         """
         logger.info(f"Starting feature processing for {'training' if is_training else 'test'} data")
         logger.info(f"Initial shape: {df.shape}")
+        logger.info(f"Include leaky column: {self.include_leaky_column}")
+        logger.info(f"Filter working alumni: {filter_working}")
+
+        # Filter for working alumni if requested (BEFORE filtering target columns)
+        if filter_working:
+            df = self.filter_working_alumni(df)
+            logger.info(f"Shape after filtering working alumni: {df.shape}")
+        
+        # Filter to target columns first
+        df = self.filter_target_columns(df, is_2017_data=is_2017_data)
         
         # Process target column first (if training)
         if is_training:
@@ -926,7 +1093,7 @@ class FeatureEngineer:
         
         # Apply all transformations
         df = self.map_program_studi(df)
-        df = self.map_relationship_level(df)
+        df = self.map_relationship_level(df)  # Will skip if leaky column excluded
         df = self.map_bidang_usaha(df)
         df = self.map_pekerjaan_ke_kelompok(df)
         df = self.map_organization(df)
@@ -978,28 +1145,103 @@ def load_column_info(filepath: str = None) -> Dict:
         logger.warning(f"Column info file not found at {filepath}")
         return {}
 
+# Example usage for training
+def process_training_data(file_path: str, include_leaky: bool = False, filter_working: bool = True):
+    """
+    Process training data with feature engineering
+    
+    Args:
+        file_path: Path to data file
+        include_leaky: Whether to include leaky column
+        filter_working: Whether to filter for working alumni only
+        
+    Returns:
+        Processed DataFrame
+    """
+    # Load data
+    if file_path.endswith('.csv'):
+        df = pd.read_csv(file_path)
+    else:
+        df = pd.read_excel(file_path)
+    
+    # Initialize feature engineer
+    engineer = FeatureEngineer(include_leaky_column=include_leaky)
+    
+    # Process features
+    df_processed = engineer.process_features(
+        df, 
+        is_training=True,
+        filter_working=filter_working
+    )
+
+    return df_processed
+
+
+# Example usage for prediction
+def process_prediction_data(file_path: str, include_leaky: bool = False, filter_working: bool = True):
+    """
+    Process data for prediction with feature engineering
+    
+    Args:
+        file_path: Path to data file
+        include_leaky: Whether to include leaky column
+        filter_working: Whether to filter for working alumni only
+        
+    Returns:
+        Processed DataFrame
+    """
+    # Load data
+    if file_path.endswith('.csv'):
+        df = pd.read_csv(file_path)
+    else:
+        df = pd.read_excel(file_path)
+    
+    # Initialize feature engineer
+    engineer = FeatureEngineer(include_leaky_column=include_leaky)
+    
+    # Process features
+    df_processed = engineer.process_features(
+        df, 
+        is_training=False,
+        filter_working=filter_working
+    )
+    
+    return df_processed
+
 
 def main():
     """
-    Example usage of feature engineering
+    Example usage of feature engineering with leakage control
     """
-    # Example usage
-    print("Feature engineering module loaded successfully!")
-    print("\nAvailable functions:")
-    print("- FeatureEngineer() class for all feature transformations")
-    print("- Comprehensive categorical mappings for all specified columns")
-    print("- Automatic handling of missing values and encoding")
+    print("Feature engineering module with leakage control loaded successfully!")
+    print("\nKey Updates:")
+    print("1. Added filter_target_columns() to select only 12 specified columns")
+    print("2. Added include_leaky_column parameter to control data leakage")
+    print("3. Updated all methods to respect leakage control settings")
+    print("4. Swapped dataset roles: 2016 as training, 2017 as test")
     
-    # Initialize feature engineer
-    fe = FeatureEngineer()
-    print("\nFeature categories loaded:")
-    print(f"- Program Studi: {len(PROGRAM_STUDI_VALUES)} categories")
-    print(f"- Bidang Usaha: {len(BIDANG_USAHA_VALUES)} categories") 
-    print(f"- Kelompok Pekerjaan: {len(KELOMPOK_PEKERJAAN)} categories")
-    print(f"- IP Categories: {len(IP_CATEGORIES)} levels")
-    print(f"- Organization Categories: {len(ORGANIZATION_CATEGORIES)} types")
-    print(f"- Activity Categories: {len(ACTIVITY_CATEGORIES)} types")
+    print("\nTarget columns that will be used:")
+    for i, col in enumerate(TARGET_COLUMNS, 1):
+        if col == LEAKY_COLUMN:
+            print(f"{i}. {col} (POTENTIALLY LEAKY)")
+        elif col == TARGET_VARIABLE:
+            print(f"{i}. {col} (TARGET VARIABLE)")
+        else:
+            print(f"{i}. {col}")
+    
+    print("\nUsage example:")
+    print("# Without leaky column:")
+    print("fe_no_leak = FeatureEngineer(include_leaky_column=False)")
+    print("df_processed = fe_no_leak.process_features(df, is_training=True)")
+    print("\n# With leaky column:")
+    print("fe_with_leak = FeatureEngineer(include_leaky_column=True)")
+    print("df_processed = fe_with_leak.process_features(df, is_training=True)")
 
 
 if __name__ == "__main__":
-    main()
+    print("Feature Engineering Module")
+    print("=" * 50)
+    print("\nExample usage:")
+    print("from build_features import process_training_data")
+    print("df_train = process_training_data('data.xlsx', filter_working=True)")
+    print("\nThis will filter the data to only include working alumni.")

@@ -1,6 +1,8 @@
 {
-  "best_model": "catboost",
-  "best_f1_score": 0.9984545159510576,
+  "best_model": "xgboost",
+  "best_f1_score": 0.9958709789306892,
   "feature_selection_used": true,
-  "n_features": 30
+  "n_features": 20,
+  "training_data": "data 2016 - daffari_raw.csv",
+  "n_training_samples": 2422
 }
