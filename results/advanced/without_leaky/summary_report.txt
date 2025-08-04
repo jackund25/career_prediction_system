@@ -5,9 +5,9 @@ Scenario: Without leaky column
 Optuna trials: 50
 
 Validation Results:
-  xgboost: F1=0.7601
-  catboost: F1=0.7653
-  ensemble: F1=0.7532
+  xgboost: F1=0.7597
+  catboost: F1=0.7658
+  ensemble: F1=0.7561
 
 Best Model: Ensemble (Soft Voting)
 ================================================================================

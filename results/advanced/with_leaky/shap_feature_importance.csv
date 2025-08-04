@@ -1,13 +1,13 @@
 feature,importance
-relationship_level_ordinal,0.4183335051546394
-job_category_encoded,0.05489793814432991
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]_numeric,0.029125257731958776
-program_studi_clean_encoded,0.024763917525773196
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan],0.01426752577319589
-technical_x_relationship,0.013438659793814445
-ip_x_org_active,0.012760309278350519
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]_numeric,0.011457216494845364
-ip_numeric,0.011382989690721657
-is_technical,0.009425773195876284
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan],0.0067974226804123706
-IP,0.004640206185567009
+relationship_level_ordinal,0.41643865979381456
+job_category_encoded,0.05567731958762885
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan],0.027640206185567024
+program_studi_clean_encoded,0.01835154639175258
+is_technical,0.01773865979381443
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]_numeric,0.016800000000000006
+technical_x_relationship,0.016627319587628867
+ip_x_org_active,0.010918041237113398
+ip_numeric,0.010470618556701027
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]_numeric,0.010088659793814427
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan],0.008789175257731962
+IP,0.007067010309278349

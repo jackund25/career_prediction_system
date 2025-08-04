@@ -1,6 +1,7 @@
 """
 Visualization module for career prediction system
 Creates publication-ready figures for paper
+Modified to separate PNG and PDF files into different folders
 """
 
 import pandas as pd
@@ -36,7 +37,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)
 
 
 class PaperVisualizer:
-    """Create publication-ready visualizations"""
+    """Create publication-ready visualizations with separated PNG and PDF folders"""
     
     def __init__(self, results_dir: str = 'results', save_dir: str = 'reports_figures'):
         # Get project root
@@ -45,10 +46,15 @@ class PaperVisualizer:
         self.results_dir = project_root / results_dir
         self.save_dir = project_root / save_dir
         
-        # Check if directories exist
-        if not self.save_dir.exists():
-            print(f"Creating directory: {self.save_dir}")
-            self.save_dir.mkdir(parents=True, exist_ok=True)
+        # Create separate folders for images and PDFs
+        self.image_dir = self.save_dir / 'images'
+        self.pdf_dir = self.save_dir / 'pdfs'
+        
+        # Create directories if they don't exist
+        for dir_path in [self.save_dir, self.image_dir, self.pdf_dir]:
+            if not dir_path.exists():
+                print(f"Creating directory: {dir_path}")
+                dir_path.mkdir(parents=True, exist_ok=True)
         
         # Load all results
         self.load_results()
@@ -61,6 +67,17 @@ class PaperVisualizer:
             return f"{name_parts[0]}_{timestamp}.{name_parts[1]}"
         else:
             return f"{base_filename}_{timestamp}"
+    
+    def save_figure(self, base_filename: str, dpi: int = 300):
+        """Save figure to both PNG and PDF folders"""
+        png_filename = self.get_timestamped_filename(base_filename.replace('.pdf', '.png'))
+        pdf_filename = self.get_timestamped_filename(base_filename.replace('.png', '.pdf'))
+        
+        plt.savefig(self.image_dir / png_filename, dpi=dpi, bbox_inches='tight')
+        plt.savefig(self.pdf_dir / pdf_filename, bbox_inches='tight')
+        
+        print(f"  📷 PNG saved: images/{png_filename}")
+        print(f"  📄 PDF saved: pdfs/{pdf_filename}")
         
     def load_results(self):
         """Load all experimental results"""
@@ -112,52 +129,65 @@ class PaperVisualizer:
                         f1_scores.append(self.results['advanced'][scenario][model]['f1'])
                         model_types.append('Advanced')
         
-        # Create DataFrame
-        df_results = pd.DataFrame({
+        # Create DataFrame for easier plotting
+        df_plot = pd.DataFrame({
             'Model': models,
             'Scenario': scenarios,
-            'F1 Score': f1_scores,
+            'F1_Score': f1_scores,
             'Type': model_types
         })
         
-        # Plot 1: Grouped bar chart
-        df_pivot = df_results.pivot_table(index='Model', columns='Scenario', values='F1 Score')
-        df_pivot.plot(kind='bar', ax=ax1, width=0.7)
-        ax1.set_title('Model Performance Comparison', fontweight='bold', pad=20)
-        ax1.set_xlabel('Model', fontweight='bold')
+        # Plot 1: F1 Scores by model and scenario
+        scenario_colors = {'Without Leaky': '#FF6B6B', 'With Leaky': '#4ECDC4'}
+        
+        for scenario in df_plot['Scenario'].unique():
+            scenario_data = df_plot[df_plot['Scenario'] == scenario]
+            x_pos = range(len(scenario_data))
+            if scenario == 'Without Leaky':
+                x_pos = [x - 0.2 for x in x_pos]
+            else:
+                x_pos = [x + 0.2 for x in x_pos]
+            
+            bars = ax1.bar(x_pos, scenario_data['F1_Score'], 
+                          width=0.4, label=scenario, 
+                          color=scenario_colors[scenario], alpha=0.8)
+            
+            # Add value labels
+            for bar in bars:
+                height = bar.get_height()
+                ax1.annotate(f'{height:.3f}',
+                            xy=(bar.get_x() + bar.get_width() / 2, height),
+                            xytext=(0, 3),
+                            textcoords="offset points",
+                            ha='center', va='bottom',
+                            fontweight='bold', fontsize=9)
+        
+        ax1.set_xlabel('Models', fontweight='bold')
         ax1.set_ylabel('F1 Score', fontweight='bold')
-        ax1.set_ylim(0, 1)
-        ax1.legend(title='Scenario', frameon=True, fancybox=True, shadow=True)
+        ax1.set_title('Model Performance Comparison', fontweight='bold', pad=20)
+        ax1.set_xticks(range(len(df_plot[df_plot['Scenario'] == 'Without Leaky'])))
+        ax1.set_xticklabels(df_plot[df_plot['Scenario'] == 'Without Leaky']['Model'], rotation=45)
+        ax1.legend(frameon=True, fancybox=True, shadow=True)
         ax1.grid(axis='y', alpha=0.3)
+        ax1.set_ylim(0, 1)
         
-        # Add value labels
-        for container in ax1.containers:
-            ax1.bar_label(container, fmt='%.3f', padding=3)
+        # Plot 2: Impact of leaky column (percentage change)
+        without_leaky = df_plot[df_plot['Scenario'] == 'Without Leaky'].set_index('Model')['F1_Score']
+        with_leaky = df_plot[df_plot['Scenario'] == 'With Leaky'].set_index('Model')['F1_Score']
         
-        # Plot 2: Impact of leaky column
-        impact_data = []
-        for model in df_pivot.index:
-            if 'Without Leaky' in df_pivot.columns and 'With Leaky' in df_pivot.columns:
-                without = df_pivot.loc[model, 'Without Leaky']
-                with_leak = df_pivot.loc[model, 'With Leaky']
-                if pd.notna(without) and pd.notna(with_leak):
-                    impact_data.append({
-                        'Model': model,
-                        'Impact': (with_leak - without) * 100  # Convert to percentage
-                    })
+        # Calculate percentage change
+        common_models = set(without_leaky.index) & set(with_leaky.index)
+        pct_changes = [(with_leaky[model] - without_leaky[model]) / without_leaky[model] * 100 
+                      for model in common_models]
         
-        df_impact = pd.DataFrame(impact_data)
-        bars = ax2.bar(df_impact['Model'], df_impact['Impact'])
+        bars = ax2.bar(range(len(common_models)), pct_changes, 
+                      color=['green' if x > 0 else 'red' for x in pct_changes], alpha=0.7)
         
-        # Color bars based on positive/negative
-        colors = ['green' if x > 0 else 'red' for x in df_impact['Impact']]
-        for bar, color in zip(bars, colors):
-            bar.set_color(color)
-            bar.set_alpha(0.7)
-        
-        ax2.set_title('Impact of Leaky Column on F1 Score', fontweight='bold', pad=20)
+        ax2.set_xticks(range(len(common_models)))
+        ax2.set_xticklabels(list(common_models), rotation=45)
         ax2.set_xlabel('Model', fontweight='bold')
         ax2.set_ylabel('F1 Score Change (%)', fontweight='bold')
+        ax2.set_title('Impact of Leaky Column', fontweight='bold', pad=20)
         ax2.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
         ax2.grid(axis='y', alpha=0.3)
         
@@ -172,8 +202,7 @@ class PaperVisualizer:
                         fontweight='bold')
         
         plt.tight_layout()
-        plt.savefig(self.save_dir / self.get_timestamped_filename('model_comparison.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(self.save_dir / self.get_timestamped_filename('model_comparison.pdf'), bbox_inches='tight')
+        self.save_figure('model_comparison.png')
         plt.show()
     
     def get_latest_predictions_file(self, scenario: str = None):
@@ -212,61 +241,38 @@ class PaperVisualizer:
             if not predictions_file:
                 return
         
-        # Load predictions
         df_pred = pd.read_csv(predictions_file)
         
-        # Check for actual target columns - try multiple possible column names
-        target_column = None
-        possible_target_columns = ['actual_target', 'target', 'Target', 'TARGET']
-        
-        for col in possible_target_columns:
-            if col in df_pred.columns:
-                target_column = col
-                print(f"Found target column: {col}")
-                break
-        
-        if target_column is None:
-            print("No target column found in predictions for confusion matrix")
-            print(f"Available columns: {list(df_pred.columns)}")
+        # Check if we have actual labels for confusion matrix
+        if 'actual_target' not in df_pred.columns:
+            print("No actual labels found for confusion matrix")
             return
-        
-        # Filter valid predictions
-        df_valid = df_pred[df_pred[target_column].notna()]
-        
-        if len(df_valid) == 0:
-            print(f"No valid targets in column '{target_column}'")
-            return
-        
-        print(f"Creating confusion matrix with {len(df_valid)} valid samples")
         
         # Create confusion matrix
-        cm = confusion_matrix(df_valid[target_column], df_valid['prediction'], labels=['tidak', 'ya'])
+        y_true = df_pred['actual_target']
+        y_pred = df_pred['prediction']
         
-        # Plot
+        cm = confusion_matrix(y_true, y_pred)
+        
         fig, ax = plt.subplots(figsize=(8, 6))
         
-        # Create heatmap
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-                    xticklabels=['Tidak Sesuai', 'Sesuai'],
-                    yticklabels=['Tidak Sesuai', 'Sesuai'],
-                    cbar_kws={'label': 'Count'},
-                    annot_kws={'size': 14, 'weight': 'bold'})
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax,
+                   xticklabels=['Tidak Sesuai', 'Sesuai'],
+                   yticklabels=['Tidak Sesuai', 'Sesuai'])
         
-        ax.set_title('Confusion Matrix - Career Alignment Prediction', fontweight='bold', pad=20)
         ax.set_xlabel('Predicted', fontweight='bold')
         ax.set_ylabel('Actual', fontweight='bold')
+        ax.set_title('Confusion Matrix', fontweight='bold', pad=20)
         
-        # Add percentages
-        total = cm.sum()
-        for i in range(2):
-            for j in range(2):
-                percentage = cm[i, j] / total * 100
-                ax.text(j + 0.5, i + 0.7, f'({percentage:.1f}%)', 
-                    ha='center', va='center', fontsize=10, color='darkred')
+        # Add accuracy text
+        accuracy = (cm[0,0] + cm[1,1]) / cm.sum()
+        ax.text(0.5, -0.1, f'Accuracy: {accuracy:.3f}', 
+                ha='center', va='center', transform=ax.transAxes, 
+                fontsize=12, fontweight='bold', 
+                bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
         
         plt.tight_layout()
-        plt.savefig(self.save_dir / self.get_timestamped_filename('confusion_matrix.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(self.save_dir / self.get_timestamped_filename('confusion_matrix.pdf'), bbox_inches='tight')
+        self.save_figure('confusion_matrix.png')
         plt.show()
     
     def create_feature_importance_plot(self):
@@ -302,8 +308,7 @@ class PaperVisualizer:
                 bar.set_color(color)
         
         plt.tight_layout()
-        plt.savefig(self.save_dir / self.get_timestamped_filename('feature_importance.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(self.save_dir / self.get_timestamped_filename('feature_importance.pdf'), bbox_inches='tight')
+        self.save_figure('feature_importance.png')
         plt.show()
     
     def create_prediction_distribution(self, predictions_file: str = None, scenario: str = None):
@@ -342,16 +347,13 @@ class PaperVisualizer:
         ax2.grid(axis='y', alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig(self.save_dir / self.get_timestamped_filename('prediction_distribution.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(self.save_dir / self.get_timestamped_filename('prediction_distribution.pdf'), bbox_inches='tight')
+        self.save_figure('prediction_distribution.png')
         plt.show()
     
     def create_temporal_analysis(self):
         """Create temporal degradation analysis"""
-        # This would show performance drop from 2016 to 2017
         fig, ax = plt.subplots(figsize=(10, 6))
         
-        # Example data - replace with actual results
         years = ['2016 (Validation)', '2017 (Test)']
         scenarios = ['Without Leaky', 'With Leaky']
         
@@ -395,14 +397,15 @@ class PaperVisualizer:
         ax.set_ylim(0, 1)
         
         plt.tight_layout()
-        plt.savefig(self.save_dir / self.get_timestamped_filename('temporal_analysis.png'), dpi=300, bbox_inches='tight')
-        plt.savefig(self.save_dir / self.get_timestamped_filename('temporal_analysis.pdf'), bbox_inches='tight')
+        self.save_figure('temporal_analysis.png')
         plt.show()
     
     def create_all_visualizations(self, scenario: str = None):
         """Create all visualizations for the paper"""
         print("Creating visualizations for paper...")
         print(f"Using scenario: {scenario if scenario else 'latest available'}")
+        print(f"📁 Images will be saved to: {self.image_dir}")
+        print(f"📁 PDFs will be saved to: {self.pdf_dir}")
         
         print("\n1. Model Comparison Plot...")
         self.create_model_comparison_plot()
@@ -419,8 +422,9 @@ class PaperVisualizer:
         print("\n5. Temporal Analysis...")
         self.create_temporal_analysis()
         
-        print(f"\nAll visualizations saved to: {self.save_dir}")
-        print("Available in both PNG (for viewing) and PDF (for paper) formats")
+        print(f"\n✅ All visualizations completed!")
+        print(f"📷 PNG files: {self.image_dir}")
+        print(f"📄 PDF files: {self.pdf_dir}")
 
 
 def create_optuna_visualization():
@@ -431,6 +435,12 @@ def create_optuna_visualization():
     # Get project root
     project_root = Path(__file__).parent.parent.parent
     save_dir = project_root / 'reports_figures'
+    image_dir = save_dir / 'images'
+    pdf_dir = save_dir / 'pdfs'
+    
+    # Create directories if they don't exist
+    for dir_path in [image_dir, pdf_dir]:
+        dir_path.mkdir(parents=True, exist_ok=True)
     
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     axes = axes.ravel()
@@ -467,9 +477,17 @@ def create_optuna_visualization():
     
     plt.suptitle('Optuna Hyperparameter Optimization History', fontsize=16, fontweight='bold')
     plt.tight_layout()
-    plt.savefig(save_dir / self.get_timestamped_filename('optuna_history.png'), dpi=300, bbox_inches='tight')
-    plt.savefig(save_dir / self.get_timestamped_filename('optuna_history.pdf'), bbox_inches='tight')
+    
+    # Save to both folders
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    plt.savefig(image_dir / f'optuna_history_{timestamp}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(pdf_dir / f'optuna_history_{timestamp}.pdf', bbox_inches='tight')
+    
+    print(f"📷 PNG saved: images/optuna_history_{timestamp}.png")
+    print(f"📄 PDF saved: pdfs/optuna_history_{timestamp}.pdf")
+    
     plt.show()
+
 
 if __name__ == "__main__":
     import argparse
@@ -487,7 +505,9 @@ if __name__ == "__main__":
     # Also create Optuna plots if available
     try:
         create_optuna_visualization()
-    except:
-        print("Could not create Optuna visualization")
+    except Exception as e:
+        print(f"Could not create Optuna visualization: {e}")
     
-    print("\nVisualization complete! Check 'reports_figures' folder")
+    print("\n🎉 Visualization complete!")
+    print("📁 Check 'reports_figures/images' for PNG files")
+    print("📁 Check 'reports_figures/pdfs' for PDF files")

@@ -126,7 +126,7 @@ class AdvancedModelTrainer:
         # Prepare test data if provided
         X_test_scaled, y_test = None, None
         if test_path:
-            df_test = pd.read_excel(test_path)
+            df_test = pd.read_csv(test_path)
             logger.info(f"Loaded test data: {df_test.shape}")
             
             df_test_processed = self.feature_engineer.process_features(
@@ -545,8 +545,8 @@ def run_experiment_comparison(train_path: str, test_path: str = None):
 def main():
     """Main function"""
     # Paths
-    train_path = 'data/01_raw/data 2016 - daffari_raw.csv'
-    test_path = 'data/01_raw/DATA TS SARJANA 2024.xlsx'
+    train_path = 'data/01_raw/DATA TS SARJANA 2023.csv'
+    test_path = 'data/01_raw/DATA TS SARJANA 2024.csv'
     
     # Check paths
     from pathlib import Path

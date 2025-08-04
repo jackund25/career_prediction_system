@@ -1,11 +1,11 @@
 feature,importance
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]_numeric,0.11568573064964781
-program_studi_clean_encoded,0.11018202421862214
-job_category_encoded,0.08841547209949263
-IP,0.07454196530846018
-ip_x_org_active,0.06796441662575688
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]_numeric,0.057442979872361265
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan],0.05734480445098999
-ip_numeric,0.030831917853051876
-Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan],0.023466224840451657
-is_technical,0.019502372770413983
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan],0.11657374406807393
+program_studi_clean_encoded,0.0963244149893633
+job_category_encoded,0.08621735395188972
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]_numeric,0.07211513663884793
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]_numeric,0.05497964326624122
+ip_x_org_active,0.05285688921616753
+IP,0.051513074783177855
+ip_numeric,0.040811438389788963
+Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan],0.03418320242186222
+is_technical,0.01894833906071018

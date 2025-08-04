@@ -1,20 +1,20 @@
 {
     "xgboost": {
-        "n_estimators": 474,
+        "n_estimators": 282,
         "max_depth": 3,
-        "learning_rate": 0.022989552522280687,
-        "subsample": 0.8175863897189154,
-        "colsample_bytree": 0.833158814635065,
-        "reg_alpha": 1.6717743016325183e-05,
-        "reg_lambda": 3.7875377450611013e-06
+        "learning_rate": 0.033948594843832225,
+        "subsample": 0.9285198462788361,
+        "colsample_bytree": 0.881034214162403,
+        "reg_alpha": 1.416187571082429e-06,
+        "reg_lambda": 0.0014701888342664503
     },
     "catboost": {
-        "iterations": 187,
-        "depth": 9,
-        "learning_rate": 0.021948828361776845,
-        "l2_leaf_reg": 0.03176665788112959,
-        "bagging_temperature": 3.9980141017613846,
-        "random_strength": 0.0009789228217116353,
-        "border_count": 180
+        "iterations": 378,
+        "depth": 8,
+        "learning_rate": 0.012217111051378071,
+        "l2_leaf_reg": 0.030752961817163738,
+        "bagging_temperature": 8.416519107781628,
+        "random_strength": 0.9734767838690913,
+        "border_count": 91
     }
 }

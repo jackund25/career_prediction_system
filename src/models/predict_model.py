@@ -476,8 +476,8 @@ if __name__ == "__main__":
     else:
         # Example usage
         print("Example usage:")
-        print("python predict_models.py data/01_raw/DATA TS SARJANA 2024.xlsx")
-        print("python predict_models.py data/01_raw/DATA TS SARJANA 2024.xlsx --compare")
+        print("python predict_models.py data/01_raw/DATA TS SARJANA 2024.csv")
+        print("python predict_models.py data/01_raw/DATA TS SARJANA 2024.csv --compare")
         print("\nOr use in Python:")
         print("from predict_models import predict_alumni_batch")
-        print("predictions = predict_alumni_batch('path/to/data.xlsx')")
+        print("predictions = predict_alumni_batch('path/to/data.csv')")

@@ -1,39 +1,40 @@
 {
     "without_leaky": {
         "RandomForest": {
-            "n_estimators": 88,
-            "max_depth": 3,
-            "min_samples_split": 7,
-            "min_samples_leaf": 7,
+            "n_estimators": 123,
+            "max_depth": 9,
+            "min_samples_split": 10,
+            "min_samples_leaf": 5,
             "max_features": null,
             "bootstrap": true
         },
         "MLP": {
-            "n_layers": 2,
-            "n_units_l0": 150,
-            "n_units_l1": 116,
+            "n_layers": 1,
+            "n_units_l0": 90,
             "activation": "tanh",
             "solver": "adam",
-            "alpha": 1.42856761240024e-05,
+            "alpha": 0.04523894084330655,
             "learning_rate": "adaptive"
         }
     },
     "with_leaky": {
         "RandomForest": {
-            "n_estimators": 70,
-            "max_depth": 20,
-            "min_samples_split": 15,
-            "min_samples_leaf": 6,
+            "n_estimators": 114,
+            "max_depth": 6,
+            "min_samples_split": 4,
+            "min_samples_leaf": 4,
             "max_features": "sqrt",
             "bootstrap": true
         },
         "MLP": {
-            "n_layers": 1,
-            "n_units_l0": 162,
-            "activation": "relu",
+            "n_layers": 3,
+            "n_units_l0": 101,
+            "n_units_l1": 86,
+            "n_units_l2": 43,
+            "activation": "tanh",
             "solver": "adam",
-            "alpha": 0.0004102589542391925,
-            "learning_rate": "adaptive"
+            "alpha": 5.122328119178894e-05,
+            "learning_rate": "constant"
         }
     }
 }

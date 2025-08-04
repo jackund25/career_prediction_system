@@ -1,0 +1,222 @@
+
+# CARRER PREDICTIONS SYSTEM - PROJECT STRUCTURE
+
+## Directory Tree
+```
+carrer-predictions-system/
+├── backup_before_cleanup
+│   ├── README.md
+│   └── requirements.txt
+├── data
+│   ├── 01_raw
+│   │   ├── DATA TS SARJANA 2023.csv
+│   │   └── DATA TS SARJANA 2024.xlsx
+│   ├── 02_processed
+│   │   └── final_analysis_results.json
+│   └── 03_features
+│       └── .gitkeep
+├── logs
+│   ├── .gitkeep
+│   ├── training_20250804_104128.log
+│   └── training_20250804_104205.log
+├── models
+│   ├── advanced
+│   │   ├── with_leaky
+│   │   │   ├── catboost.pkl
+│   │   │   ├── ensemble.pkl
+│   │   │   ├── feature_engineer.pkl
+│   │   │   ├── label_encoder.pkl
+│   │   │   ├── scaler.pkl
+│   │   │   └── xgboost.pkl
+│   │   └── without_leaky
+│   │       ├── catboost.pkl
+│   │       ├── ensemble.pkl
+│   │       ├── feature_engineer.pkl
+│   │       ├── label_encoder.pkl
+│   │       ├── scaler.pkl
+│   │       └── xgboost.pkl
+│   └── baseline
+│       ├── best_params.json
+│       ├── feature_engineer.pkl
+│       ├── label_encoder.pkl
+│       ├── optuna_study_mlp_no_leak.pkl
+│       ├── optuna_study_mlp_with_leak.pkl
+│       ├── optuna_study_rf_no_leak.pkl
+│       ├── optuna_study_rf_with_leak.pkl
+│       └── scaler.pkl
+├── notebooks
+│   ├── 01_eda_dan_validasi.ipynb
+│   ├── 02_baseline_model_development.ipynb
+│   └── 03_analisis_hasil_akhir.ipynb
+├── plots
+│   └── advanced
+│       ├── with_leaky
+│       │   ├── shap_importance.png
+│       │   └── shap_summary.png
+│       └── without_leaky
+│           ├── shap_importance.png
+│           └── shap_summary.png
+├── reports_figures
+│   ├── confusion_matrix_20250724_165409.pdf
+│   ├── confusion_matrix_20250724_165409.png
+│   ├── feature_importance_20250724_165400.pdf
+│   ├── feature_importance_20250724_165400.png
+│   ├── model_comparison_20250724_165354.png
+│   ├── model_comparison_20250724_165355.pdf
+│   ├── prediction_distribution_20250724_165405.pdf
+│   ├── prediction_distribution_20250724_165405.png
+│   ├── temporal_analysis_20250724_165411.pdf
+│   └── temporal_analysis_20250724_165411.png
+├── results
+│   ├── advanced
+│   │   ├── with_leaky
+│   │   │   ├── best_params.json
+│   │   │   ├── optuna_study_catboost.pkl
+│   │   │   ├── optuna_study_xgboost.pkl
+│   │   │   ├── shap_feature_importance.csv
+│   │   │   ├── summary_report.txt
+│   │   │   └── validation_results.json
+│   │   ├── without_leaky
+│   │   │   ├── best_params.json
+│   │   │   ├── optuna_study_catboost.pkl
+│   │   │   ├── optuna_study_xgboost.pkl
+│   │   │   ├── shap_feature_importance.csv
+│   │   │   ├── summary_report.txt
+│   │   │   └── validation_results.json
+│   │   └── experiment_comparison.json
+│   ├── baseline
+│   │   └── baseline_results_optimized.json
+│   └── predictions
+│       ├── predictions_without_leaky_20250724_130107.csv
+│       ├── predictions_without_leaky_20250724_130107.json
+│       ├── predictions_without_leaky_20250724_154539.csv
+│       └── predictions_without_leaky_20250724_154539.json
+├── src
+│   ├── data
+│   │   ├── __init__.py
+│   │   ├── ensure_data_compatibility.py
+│   │   └── make_dataset.py
+│   ├── features
+│   │   ├── __init__.py
+│   │   └── build_features.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   ├── predict_model.py
+│   │   ├── tempCodeRunnerFile.py
+│   │   ├── train_models.py
+│   │   └── visualize_results.py
+│   ├── scripts
+│   │   └── .gitkeep
+│   └── __init__.py
+├── .gitignore
+├── cleanup_directories.py
+├── generate_structure.py
+├── README.md
+└── requirements.txt
+
+```
+
+## Directory Descriptions
+
+### Root Level
+- **README.md**: Project documentation and setup instructions
+- **requirements.txt**: Python package dependencies
+- **career-pred-sys/**: Virtual environment directory (excluded from tree)
+
+### `/data/`
+Data storage organized by processing stage:
+- **01_raw/**: Original, unprocessed datasets
+  - `data 2016 - daffari_raw.csv`: Training data from 2016
+  - `DATA TS SARJANA 2024.xlsx`: Prediction target data from 2024
+- **02_processed/**: Cleaned and processed datasets
+  - Feature-engineered data
+  - Column analysis results
+  - Preprocessed datasets ready for modeling
+
+### `/models/`
+Trained model artifacts organized by approach:
+- **advanced/**: Advanced models (XGBoost, CatBoost, Ensemble)
+  - `without_leaky/`: Models trained without leaky features
+  - `with_leaky/`: Models trained with potentially leaky features
+- **baseline/**: Baseline models (Random Forest, MLP)
+- Individual model files (.pkl), preprocessors, and metadata
+
+### `/notebooks/`
+Jupyter notebooks for analysis and experimentation:
+- **01_eda_dan_validasi.ipynb**: Exploratory Data Analysis and validation
+- **02_baseline_model_development.ipynb**: Baseline model development
+- **03_analisis_hasil_akhir.ipynb**: Final results analysis
+
+### `/src/`
+Source code organized by functionality:
+- **data/**: Data processing and compatibility modules
+  - `make_dataset.py`: Dataset creation utilities
+  - `ensure_data_compatibility.py`: Cross-year data standardization
+- **features/**: Feature engineering and selection
+  - `build_features.py`: Main feature engineering pipeline
+- **models/**: Model training and prediction
+  - `train_models.py`: Advanced model training with optimization
+  - `predict_model.py`: Prediction pipeline for new data
+  - `visualize_results.py`: Results visualization and analysis
+
+### `/results/`
+Experimental results and outputs:
+- **predictions/**: Model predictions on test data
+  - CSV files with predictions and confidence scores
+  - JSON files with evaluation metrics
+- **advanced/**: Advanced model results by scenario
+  - Validation results
+  - Performance metrics
+  - Feature importance data
+- **baseline/**: Baseline model results
+
+### `/reports/`
+Documentation and visualizations:
+- **figures/**: Generated plots and charts
+  - Model comparison plots
+  - Feature importance visualizations
+  - Performance analysis charts
+
+## Key Features
+
+### Data Processing
+- Cross-temporal data standardization (2016 ↔ 2024)
+- Feature engineering with interaction terms
+- Missing value handling strategies
+
+### Model Development
+- Baseline models: Random Forest, MLP
+- Advanced models: XGBoost, CatBoost, Ensemble
+- Hyperparameter optimization with Optuna
+- Feature selection using SHAP values
+
+### Evaluation Framework
+- Leaky vs non-leaky feature comparison
+- Temporal validation (train on 2016, test on 2024)
+- Comprehensive metrics and visualizations
+
+### Prediction Pipeline
+- Clean API for batch predictions
+- Confidence scoring and uncertainty quantification
+- Model agreement analysis
+
+## Usage Workflow
+
+1. **Data Preparation**: Process raw data using `/src/data/` modules
+2. **Feature Engineering**: Create features using `/src/features/build_features.py`
+3. **Model Training**: Train models using `/src/models/train_models.py`
+4. **Prediction**: Make predictions using `/src/models/predict_model.py`
+5. **Analysis**: Analyze results using notebooks and visualization tools
+
+## Technology Stack
+- **Python 3.12+**
+- **Machine Learning**: scikit-learn, XGBoost, CatBoost, LightGBM
+- **Optimization**: Optuna
+- **Interpretation**: SHAP
+- **Data Processing**: pandas, numpy
+- **Visualization**: matplotlib, seaborn, plotly
+- **Development**: Jupyter, pytest
+
+---
+Generated on: 2025-08-04 11:16:17
+Project: Career Prediction System for ITB Alumni
