@@ -317,3 +317,4 @@ api_keys.json
 !models/model_metadata.json
 !schemas/*.json
 !requirements.json
+generate_structure.py
