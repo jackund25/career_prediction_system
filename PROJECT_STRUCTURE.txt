@@ -1,24 +1,488 @@
 
-# CARRER PREDICTIONS SYSTEM - PROJECT STRUCTURE
+# CAREER PREDICTIONS SYSTEM - PROJECT STRUCTURE
 
 ## Directory Tree
 ```
-carrer-predictions-system/
+career-predictions-system/
 ├── backup_before_cleanup
 │   ├── README.md
 │   └── requirements.txt
+├── career_prediction
+│   ├── etc
+│   │   └── jupyter
+│   │       ├── jupyter_notebook_config.d
+│   │       ├── jupyter_server_config.d
+│   │       └── nbconfig
+│   ├── Include
+│   │   └── site
+│   │       └── python3.12
+│   ├── Lib
+│   │   └── site-packages
+│   │       ├── _argon2_cffi_bindings
+│   │       ├── _distutils_hack
+│   │       ├── _plotly_future_
+│   │       ├── _plotly_utils
+│   │       ├── _yaml
+│   │       ├── adodbapi
+│   │       ├── alembic
+│   │       ├── alembic-1.16.4.dist-info
+│   │       ├── annotated_types
+│   │       ├── annotated_types-0.7.0.dist-info
+│   │       ├── anyio
+│   │       ├── anyio-4.10.0.dist-info
+│   │       ├── argon2
+│   │       ├── argon2_cffi-25.1.0.dist-info
+│   │       ├── argon2_cffi_bindings-25.1.0.dist-info
+│   │       ├── arrow
+│   │       ├── arrow-1.3.0.dist-info
+│   │       ├── asttokens
+│   │       ├── asttokens-3.0.0.dist-info
+│   │       ├── async_lru
+│   │       ├── async_lru-2.0.5.dist-info
+│   │       ├── attr
+│   │       ├── attrs
+│   │       ├── attrs-25.3.0.dist-info
+│   │       ├── babel
+│   │       ├── babel-2.17.0.dist-info
+│   │       ├── beautifulsoup4-4.13.4.dist-info
+│   │       ├── bleach
+│   │       ├── bleach-6.2.0.dist-info
+│   │       ├── blinker
+│   │       ├── blinker-1.9.0.dist-info
+│   │       ├── bs4
+│   │       ├── cachetools
+│   │       ├── cachetools-5.5.2.dist-info
+│   │       ├── catboost
+│   │       ├── catboost-1.2.8.dist-info
+│   │       ├── certifi
+│   │       ├── certifi-2025.8.3.dist-info
+│   │       ├── cffi
+│   │       ├── cffi-1.17.1.dist-info
+│   │       ├── charset_normalizer
+│   │       ├── charset_normalizer-3.4.3.dist-info
+│   │       ├── click
+│   │       ├── click-8.2.1.dist-info
+│   │       ├── cloudpickle
+│   │       ├── cloudpickle-3.1.1.dist-info
+│   │       ├── cmaes
+│   │       ├── cmaes-0.12.0.dist-info
+│   │       ├── colorama
+│   │       ├── colorama-0.4.6.dist-info
+│   │       ├── colorlog
+│   │       ├── colorlog-6.9.0.dist-info
+│   │       ├── comm
+│   │       ├── comm-0.2.3.dist-info
+│   │       ├── contourpy
+│   │       ├── contourpy-1.3.3.dist-info
+│   │       ├── cycler
+│   │       ├── cycler-0.12.1.dist-info
+│   │       ├── databricks
+│   │       ├── databricks_sdk-0.62.0.dist-info
+│   │       ├── dateutil
+│   │       ├── dateutil-stubs
+│   │       ├── debugpy
+│   │       ├── debugpy-1.8.16.dist-info
+│   │       ├── decorator-5.2.1.dist-info
+│   │       ├── defusedxml
+│   │       ├── defusedxml-0.7.1.dist-info
+│   │       ├── docker
+│   │       ├── docker-7.1.0.dist-info
+│   │       ├── et_xmlfile
+│   │       ├── et_xmlfile-2.0.0.dist-info
+│   │       ├── executing
+│   │       ├── executing-2.2.0.dist-info
+│   │       ├── fastapi
+│   │       ├── fastapi-0.116.1.dist-info
+│   │       ├── fastjsonschema
+│   │       ├── fastjsonschema-2.21.1.dist-info
+│   │       ├── flask
+│   │       ├── flask-3.1.1.dist-info
+│   │       ├── fontTools
+│   │       ├── fonttools-4.59.0.dist-info
+│   │       ├── fqdn
+│   │       ├── fqdn-1.5.1.dist-info
+│   │       ├── git
+│   │       ├── gitdb
+│   │       ├── gitdb-4.0.12.dist-info
+│   │       ├── gitpython-3.1.45.dist-info
+│   │       ├── google
+│   │       ├── google_auth-2.40.3.dist-info
+│   │       ├── graphene
+│   │       ├── graphene-3.4.3.dist-info
+│   │       ├── graphql
+│   │       ├── graphql_core-3.2.6.dist-info
+│   │       ├── graphql_relay
+│   │       ├── graphql_relay-3.2.0.dist-info
+│   │       ├── graphviz
+│   │       ├── graphviz-0.21.dist-info
+│   │       ├── greenlet
+│   │       ├── greenlet-3.2.4.dist-info
+│   │       ├── h11
+│   │       ├── h11-0.16.0.dist-info
+│   │       ├── httpcore
+│   │       ├── httpcore-1.0.9.dist-info
+│   │       ├── httpx
+│   │       ├── httpx-0.28.1.dist-info
+│   │       ├── idna
+│   │       ├── idna-3.10.dist-info
+│   │       ├── importlib_metadata
+│   │       ├── importlib_metadata-8.7.0.dist-info
+│   │       ├── ipykernel
+│   │       ├── ipykernel-6.25.0.dist-info
+│   │       ├── IPython
+│   │       ├── ipython-9.4.0.dist-info
+│   │       ├── ipython_pygments_lexers-1.1.1.dist-info
+│   │       ├── ipywidgets
+│   │       ├── ipywidgets-8.1.7.dist-info
+│   │       ├── isapi
+│   │       ├── isoduration
+│   │       ├── isoduration-20.11.0.dist-info
+│   │       ├── itsdangerous
+│   │       ├── itsdangerous-2.2.0.dist-info
+│   │       ├── jedi
+│   │       ├── jedi-0.19.2.dist-info
+│   │       ├── jinja2
+│   │       ├── jinja2-3.1.6.dist-info
+│   │       ├── joblib
+│   │       ├── joblib-1.5.1.dist-info
+│   │       ├── json5
+│   │       ├── json5-0.12.0.dist-info
+│   │       ├── jsonpointer-3.0.0.dist-info
+│   │       ├── jsonschema
+│   │       ├── jsonschema-4.25.0.dist-info
+│   │       ├── jsonschema_specifications
+│   │       ├── jsonschema_specifications-2025.4.1.dist-info
+│   │       ├── jupyter-1.0.0.dist-info
+│   │       ├── jupyter_client
+│   │       ├── jupyter_client-8.6.3.dist-info
+│   │       ├── jupyter_console
+│   │       ├── jupyter_console-6.6.3.dist-info
+│   │       ├── jupyter_core
+│   │       ├── jupyter_core-5.8.1.dist-info
+│   │       ├── jupyter_events
+│   │       ├── jupyter_events-0.12.0.dist-info
+│   │       ├── jupyter_lsp
+│   │       ├── jupyter_lsp-2.2.6.dist-info
+│   │       ├── jupyter_server
+│   │       ├── jupyter_server-2.16.0.dist-info
+│   │       ├── jupyter_server_terminals
+│   │       ├── jupyter_server_terminals-0.5.3.dist-info
+│   │       ├── jupyterlab
+│   │       ├── jupyterlab-4.4.5.dist-info
+│   │       ├── jupyterlab_plotly
+│   │       ├── jupyterlab_pygments
+│   │       ├── jupyterlab_pygments-0.3.0.dist-info
+│   │       ├── jupyterlab_server
+│   │       ├── jupyterlab_server-2.27.3.dist-info
+│   │       ├── jupyterlab_widgets
+│   │       ├── jupyterlab_widgets-3.0.15.dist-info
+│   │       ├── kiwisolver
+│   │       ├── kiwisolver-1.4.8.dist-info
+│   │       ├── lark
+│   │       ├── lark-1.2.2.dist-info
+│   │       ├── lightgbm
+│   │       ├── lightgbm-4.0.0.dist-info
+│   │       ├── mako
+│   │       ├── mako-1.3.10.dist-info
+│   │       ├── markupsafe
+│   │       ├── MarkupSafe-3.0.2.dist-info
+│   │       ├── matplotlib
+│   │       ├── matplotlib-3.10.5.dist-info
+│   │       ├── matplotlib_inline
+│   │       ├── matplotlib_inline-0.1.7.dist-info
+│   │       ├── mistune
+│   │       ├── mistune-3.1.3.dist-info
+│   │       ├── mlflow
+│   │       ├── mlflow-3.2.0.dist-info
+│   │       ├── mlflow_skinny-3.2.0.dist-info
+│   │       ├── mlflow_tracing-3.2.0.dist-info
+│   │       ├── mpl_toolkits
+│   │       ├── nbclient
+│   │       ├── nbclient-0.10.2.dist-info
+│   │       ├── nbconvert
+│   │       ├── nbconvert-7.16.6.dist-info
+│   │       ├── nbformat
+│   │       ├── nbformat-5.10.4.dist-info
+│   │       ├── nest_asyncio-1.6.0.dist-info
+│   │       ├── notebook
+│   │       ├── notebook-7.4.5.dist-info
+│   │       ├── notebook_shim
+│   │       ├── notebook_shim-0.2.4.dist-info
+│   │       ├── numpy
+│   │       ├── numpy-2.3.2.dist-info
+│   │       ├── numpy.libs
+│   │       ├── openpyxl
+│   │       ├── openpyxl-3.1.2.dist-info
+│   │       ├── opentelemetry
+│   │       ├── opentelemetry_api-1.36.0.dist-info
+│   │       ├── opentelemetry_sdk-1.36.0.dist-info
+│   │       ├── opentelemetry_semantic_conventions-0.57b0.dist-info
+│   │       ├── optuna
+│   │       ├── optuna-3.2.0.dist-info
+│   │       ├── overrides
+│   │       ├── overrides-7.7.0.dist-info
+│   │       ├── packaging
+│   │       ├── packaging-25.0.dist-info
+│   │       ├── pandas
+│   │       ├── pandas-2.3.1.dist-info
+│   │       ├── pandas.libs
+│   │       ├── pandocfilters-1.5.1.dist-info
+│   │       ├── parso
+│   │       ├── parso-0.8.4.dist-info
+│   │       ├── PIL
+│   │       ├── pillow-11.3.0.dist-info
+│   │       ├── pip
+│   │       ├── pip-25.2.dist-info
+│   │       ├── pkg_resources
+│   │       ├── platformdirs
+│   │       ├── platformdirs-4.3.8.dist-info
+│   │       ├── plotly
+│   │       ├── plotly-5.15.0.dist-info
+│   │       ├── prometheus_client
+│   │       ├── prometheus_client-0.22.1.dist-info
+│   │       ├── prompt_toolkit
+│   │       ├── prompt_toolkit-3.0.51.dist-info
+│   │       ├── protobuf-6.31.1.dist-info
+│   │       ├── psutil
+│   │       ├── psutil-7.0.0.dist-info
+│   │       ├── pure_eval
+│   │       ├── pure_eval-0.2.3.dist-info
+│   │       ├── pyarrow
+│   │       ├── pyarrow-21.0.0.dist-info
+│   │       ├── pyarrow.libs
+│   │       ├── pyasn1
+│   │       ├── pyasn1-0.6.1.dist-info
+│   │       ├── pyasn1_modules
+│   │       ├── pyasn1_modules-0.4.2.dist-info
+│   │       ├── pycparser
+│   │       ├── pycparser-2.22.dist-info
+│   │       ├── pydantic
+│   │       ├── pydantic-2.11.7.dist-info
+│   │       ├── pydantic_core
+│   │       ├── pydantic_core-2.33.2.dist-info
+│   │       ├── pygments
+│   │       ├── pygments-2.19.2.dist-info
+│   │       ├── pyparsing
+│   │       ├── pyparsing-3.2.3.dist-info
+│   │       ├── python_dateutil-2.9.0.post0.dist-info
+│   │       ├── python_json_logger-3.3.0.dist-info
+│   │       ├── pythonjsonlogger
+│   │       ├── pythonwin
+│   │       ├── pytz
+│   │       ├── pytz-2025.2.dist-info
+│   │       ├── pywin32-311.dist-info
+│   │       ├── pywin32_system32
+│   │       ├── pywinpty-2.0.15.dist-info
+│   │       ├── PyYAML-6.0.2.dist-info
+│   │       ├── pyzmq-27.0.1.dist-info
+│   │       ├── qtconsole
+│   │       ├── qtconsole-5.6.1.dist-info
+│   │       ├── qtpy
+│   │       ├── QtPy-2.4.3.dist-info
+│   │       ├── referencing
+│   │       ├── referencing-0.36.2.dist-info
+│   │       ├── requests
+│   │       ├── requests-2.32.4.dist-info
+│   │       ├── rfc3339_validator-0.1.4.dist-info
+│   │       ├── rfc3986_validator-0.1.1.dist-info
+│   │       ├── rfc3987_syntax
+│   │       ├── rfc3987_syntax-1.1.0.dist-info
+│   │       ├── rpds
+│   │       ├── rpds_py-0.27.0.dist-info
+│   │       ├── rsa
+│   │       ├── rsa-4.9.1.dist-info
+│   │       ├── scikit_learn-1.7.1.dist-info
+│   │       ├── scipy
+│   │       ├── scipy-1.16.1.dist-info
+│   │       ├── scipy.libs
+│   │       ├── seaborn
+│   │       ├── seaborn-0.12.2.dist-info
+│   │       ├── send2trash
+│   │       ├── Send2Trash-1.8.3.dist-info
+│   │       ├── setuptools
+│   │       ├── setuptools-80.9.0.dist-info
+│   │       ├── six-1.17.0.dist-info
+│   │       ├── sklearn
+│   │       ├── smmap
+│   │       ├── smmap-5.0.2.dist-info
+│   │       ├── sniffio
+│   │       ├── sniffio-1.3.1.dist-info
+│   │       ├── soupsieve
+│   │       ├── soupsieve-2.7.dist-info
+│   │       ├── sqlalchemy
+│   │       ├── sqlalchemy-2.0.42.dist-info
+│   │       ├── sqlparse
+│   │       ├── sqlparse-0.5.3.dist-info
+│   │       ├── stack_data
+│   │       ├── stack_data-0.6.3.dist-info
+│   │       ├── starlette
+│   │       ├── starlette-0.47.2.dist-info
+│   │       ├── tenacity
+│   │       ├── tenacity-9.1.2.dist-info
+│   │       ├── terminado
+│   │       ├── terminado-0.18.1.dist-info
+│   │       ├── threadpoolctl-3.6.0.dist-info
+│   │       ├── tinycss2
+│   │       ├── tinycss2-1.4.0.dist-info
+│   │       ├── tornado
+│   │       ├── tornado-6.5.2.dist-info
+│   │       ├── tqdm
+│   │       ├── tqdm-4.67.1.dist-info
+│   │       ├── traitlets
+│   │       ├── traitlets-5.14.3.dist-info
+│   │       ├── types_python_dateutil-2.9.0.20250809.dist-info
+│   │       ├── typing_extensions-4.14.1.dist-info
+│   │       ├── typing_inspection
+│   │       ├── typing_inspection-0.4.1.dist-info
+│   │       ├── tzdata
+│   │       ├── tzdata-2025.2.dist-info
+│   │       ├── uri_template
+│   │       ├── uri_template-1.3.0.dist-info
+│   │       ├── urllib3
+│   │       ├── urllib3-2.5.0.dist-info
+│   │       ├── uvicorn
+│   │       ├── uvicorn-0.35.0.dist-info
+│   │       ├── waitress
+│   │       ├── waitress-3.0.2.dist-info
+│   │       ├── wcwidth
+│   │       ├── wcwidth-0.2.13.dist-info
+│   │       ├── webcolors
+│   │       ├── webcolors-24.11.1.dist-info
+│   │       ├── webencodings
+│   │       ├── webencodings-0.5.1.dist-info
+│   │       ├── websocket
+│   │       ├── websocket_client-1.8.0.dist-info
+│   │       ├── werkzeug
+│   │       ├── werkzeug-3.1.3.dist-info
+│   │       ├── widgetsnbextension
+│   │       ├── widgetsnbextension-4.0.14.dist-info
+│   │       ├── win32
+│   │       ├── win32com
+│   │       ├── win32comext
+│   │       ├── winpty
+│   │       ├── xgboost
+│   │       ├── xgboost-1.7.6.dist-info
+│   │       ├── yaml
+│   │       ├── zipp
+│   │       ├── zipp-3.23.0.dist-info
+│   │       ├── zmq
+│   │       ├── decorator.py
+│   │       ├── distutils-precedence.pth
+│   │       ├── ipykernel_launcher.py
+│   │       ├── ipython_pygments_lexers.py
+│   │       ├── jsonpointer.py
+│   │       ├── jupyter.py
+│   │       ├── nest_asyncio.py
+│   │       ├── pandocfilters.py
+│   │       ├── pylab.py
+│   │       ├── pythoncom.py
+│   │       ├── PyWin32.chm
+│   │       ├── pywin32.pth
+│   │       ├── pywin32.version.txt
+│   │       ├── rfc3339_validator.py
+│   │       ├── rfc3986_validator.py
+│   │       ├── scipy-1.16.1-cp312-cp312-win_amd64.whl
+│   │       ├── six.py
+│   │       ├── threadpoolctl.py
+│   │       └── typing_extensions.py
+│   ├── Scripts
+│   ├── share
+│   │   ├── applications
+│   │   ├── icons
+│   │   │   └── hicolor
+│   │   ├── jupyter
+│   │   │   ├── kernels
+│   │   │   ├── lab
+│   │   │   ├── labextensions
+│   │   │   ├── nbconvert
+│   │   │   └── nbextensions
+│   │   └── man
+│   │       └── man1
+│   └── xgboost
+├── catboost_info
+│   ├── learn
+│   │   └── events.out.tfevents
+│   ├── tmp
+│   ├── catboost_training.json
+│   ├── learn_error.tsv
+│   └── time_left.tsv
 ├── data
 │   ├── 01_raw
-│   │   ├── DATA TS SARJANA 2023.csv
-│   │   └── DATA TS SARJANA 2024.xlsx
+│   │   ├── DATA_TS_SARJANA_AKT_2014.csv
+│   │   ├── DATA_TS_SARJANA_AKT_2015.csv
+│   │   ├── DATA_TS_SARJANA_AKT_2016.csv
+│   │   └── DATA_TS_SARJANA_AKT_2017.csv
 │   ├── 02_processed
-│   │   └── final_analysis_results.json
+│   │   ├── baseline_2016
+│   │   │   ├── test_data.csv
+│   │   │   └── train_data.csv
+│   │   ├── full_2014_2016
+│   │   │   ├── test_data.csv
+│   │   │   └── train_data.csv
+│   │   ├── incremental_2015_2016
+│   │   │   ├── test_data.csv
+│   │   │   └── train_data.csv
+│   │   ├── baseline_2016.csv
+│   │   ├── column_analysis.json
+│   │   ├── compatibility_report.json
+│   │   ├── final_analysis_results.json
+│   │   └── incremental_2015_2016.csv
 │   └── 03_features
 │       └── .gitkeep
+├── experiments
+│   └── mlruns
 ├── logs
 │   ├── .gitkeep
+│   ├── advanced_incremental_training_20250808_161543.log
+│   ├── advanced_incremental_training_20250808_162016.log
+│   ├── incremental_comparison_20250811_020743.log
+│   ├── incremental_training_20250808_153937.log
+│   ├── incremental_training_20250808_154809.log
+│   ├── incremental_training_20250808_160323.log
+│   ├── incremental_training_20250808_160328.log
+│   ├── incremental_training_20250808_160445.log
+│   ├── incremental_training_20250808_160604.log
+│   ├── incremental_training_20250808_160741.log
+│   ├── incremental_training_20250808_160906.log
+│   ├── incremental_training_20250808_160955.log
+│   ├── incremental_training_20250808_161127.log
 │   ├── training_20250804_104128.log
 │   └── training_20250804_104205.log
+├── mlruns
+│   ├── 0
+│   ├── 595429996053389147
+│   │   ├── 2c8c6c5c7fea44009a77779530a36a14
+│   │   │   ├── artifacts
+│   │   │   ├── metrics
+│   │   │   ├── params
+│   │   │   └── tags
+│   │   └── fd085b7338dd43e69d6b7cdebd214422
+│   │       ├── artifacts
+│   │       ├── metrics
+│   │       ├── params
+│   │       └── tags
+│   ├── 978100182479634706
+│   │   ├── 66ae423dcf5e40e5b701172cda05672b
+│   │   │   ├── artifacts
+│   │   │   ├── metrics
+│   │   │   ├── params
+│   │   │   └── tags
+│   │   ├── ad00a48ce4114028b79df98bd8bf5232
+│   │   │   ├── artifacts
+│   │   │   ├── metrics
+│   │   │   ├── params
+│   │   │   └── tags
+│   │   ├── c35d168a17f3453bbf56b26ddcca89f8
+│   │   │   ├── artifacts
+│   │   │   ├── metrics
+│   │   │   ├── params
+│   │   │   └── tags
+│   │   └── d91596edf0df479bbe1e5c6e86f60ccd
+│   │       ├── artifacts
+│   │       ├── metrics
+│   │       ├── params
+│   │       └── tags
+│   └── models
 ├── models
 │   ├── advanced
 │   │   ├── with_leaky
@@ -35,28 +499,93 @@ carrer-predictions-system/
 │   │       ├── label_encoder.pkl
 │   │       ├── scaler.pkl
 │   │       └── xgboost.pkl
-│   └── baseline
-│       ├── best_params.json
-│       ├── feature_engineer.pkl
-│       ├── label_encoder.pkl
-│       ├── optuna_study_mlp_no_leak.pkl
-│       ├── optuna_study_mlp_with_leak.pkl
-│       ├── optuna_study_rf_no_leak.pkl
-│       ├── optuna_study_rf_with_leak.pkl
-│       └── scaler.pkl
+│   ├── advanced_incremental
+│   │   ├── baseline_2016_no_leaky
+│   │   │   ├── catboost.pkl
+│   │   │   ├── ensemble.pkl
+│   │   │   ├── feature_engineer.pkl
+│   │   │   ├── label_encoder.pkl
+│   │   │   ├── scaler.pkl
+│   │   │   └── xgboost.pkl
+│   │   ├── full_2014_2016_no_leaky
+│   │   │   ├── catboost.pkl
+│   │   │   ├── ensemble.pkl
+│   │   │   ├── feature_engineer.pkl
+│   │   │   ├── label_encoder.pkl
+│   │   │   ├── scaler.pkl
+│   │   │   └── xgboost.pkl
+│   │   └── incremental_2015_2016_no_leaky
+│   │       ├── catboost.pkl
+│   │       ├── ensemble.pkl
+│   │       ├── feature_engineer.pkl
+│   │       ├── label_encoder.pkl
+│   │       ├── scaler.pkl
+│   │       └── xgboost.pkl
+│   ├── baseline
+│   │   ├── best_params.json
+│   │   ├── feature_engineer.pkl
+│   │   ├── label_encoder.pkl
+│   │   ├── optuna_study_mlp_no_leak.pkl
+│   │   ├── optuna_study_mlp_with_leak.pkl
+│   │   ├── optuna_study_rf_no_leak.pkl
+│   │   ├── optuna_study_rf_with_leak.pkl
+│   │   └── scaler.pkl
+│   └── incremental
+│       ├── baseline_2016
+│       │   ├── feature_engineer.pkl
+│       │   ├── feature_names.pkl
+│       │   ├── label_encoder.pkl
+│       │   ├── random_forest.pkl
+│       │   └── scaler.pkl
+│       ├── full_2014_2016
+│       │   ├── feature_engineer.pkl
+│       │   ├── feature_names.pkl
+│       │   ├── label_encoder.pkl
+│       │   ├── random_forest.pkl
+│       │   └── scaler.pkl
+│       └── incremental_2015_2016
+│           ├── feature_engineer.pkl
+│           ├── feature_names.pkl
+│           ├── label_encoder.pkl
+│           ├── random_forest.pkl
+│           └── scaler.pkl
 ├── notebooks
 │   ├── 01_eda_dan_validasi.ipynb
 │   ├── 02_baseline_model_development.ipynb
 │   └── 03_analisis_hasil_akhir.ipynb
 ├── plots
-│   └── advanced
-│       ├── with_leaky
-│       │   ├── shap_importance.png
-│       │   └── shap_summary.png
-│       └── without_leaky
-│           ├── shap_importance.png
-│           └── shap_summary.png
+│   ├── advanced
+│   │   ├── with_leaky
+│   │   │   ├── shap_importance.png
+│   │   │   └── shap_summary.png
+│   │   └── without_leaky
+│   │       ├── shap_importance.png
+│   │       └── shap_summary.png
+│   ├── advanced_incremental
+│   │   ├── baseline_2016_no_leaky
+│   │   │   ├── shap_importance.png
+│   │   │   └── shap_summary.png
+│   │   ├── full_2014_2016_no_leaky
+│   │   │   ├── shap_importance.png
+│   │   │   └── shap_summary.png
+│   │   └── incremental_2015_2016_no_leaky
+│   │       ├── shap_importance.png
+│   │       └── shap_summary.png
+│   └── baseline
+├── reports
 ├── reports_figures
+│   ├── images
+│   │   ├── feature_importance_20250804_152254.png
+│   │   ├── model_comparison_20250804_152248.png
+│   │   ├── optuna_history_20250804_152307.png
+│   │   ├── prediction_distribution_20250804_152300.png
+│   │   └── temporal_analysis_20250804_152303.png
+│   ├── pdfs
+│   │   ├── feature_importance_20250804_152254.pdf
+│   │   ├── model_comparison_20250804_152248.pdf
+│   │   ├── optuna_history_20250804_152307.pdf
+│   │   ├── prediction_distribution_20250804_152300.pdf
+│   │   └── temporal_analysis_20250804_152303.pdf
 │   ├── confusion_matrix_20250724_165409.pdf
 │   ├── confusion_matrix_20250724_165409.png
 │   ├── feature_importance_20250724_165400.pdf
@@ -84,13 +613,26 @@ carrer-predictions-system/
 │   │   │   ├── summary_report.txt
 │   │   │   └── validation_results.json
 │   │   └── experiment_comparison.json
+│   ├── advanced_incremental
+│   │   ├── baseline_2016_no_leaky
+│   │   │   ├── optuna_study_catboost.pkl
+│   │   │   └── optuna_study_xgboost.pkl
+│   │   ├── full_2014_2016_no_leaky
+│   │   │   ├── optuna_study_catboost.pkl
+│   │   │   └── optuna_study_xgboost.pkl
+│   │   └── incremental_2015_2016_no_leaky
+│   │       ├── optuna_study_catboost.pkl
+│   │       └── optuna_study_xgboost.pkl
 │   ├── baseline
 │   │   └── baseline_results_optimized.json
+│   ├── incremental
 │   └── predictions
 │       ├── predictions_without_leaky_20250724_130107.csv
 │       ├── predictions_without_leaky_20250724_130107.json
 │       ├── predictions_without_leaky_20250724_154539.csv
-│       └── predictions_without_leaky_20250724_154539.json
+│       ├── predictions_without_leaky_20250724_154539.json
+│       ├── predictions_without_leaky_20250804_152226.csv
+│       └── predictions_without_leaky_20250804_152226.json
 ├── src
 │   ├── data
 │   │   ├── __init__.py
@@ -109,8 +651,9 @@ carrer-predictions-system/
 │   │   └── .gitkeep
 │   └── __init__.py
 ├── .gitignore
-├── cleanup_directories.py
+├── filter_tracer.py
 ├── generate_structure.py
+├── PROJECT_STRUCTURE.txt
 ├── README.md
 └── requirements.txt
 
@@ -218,5 +761,5 @@ Documentation and visualizations:
 - **Development**: Jupyter, pytest
 
 ---
-Generated on: 2025-08-04 11:16:17
+Generated on: 2025-08-14 15:22:08
 Project: Career Prediction System for ITB Alumni
