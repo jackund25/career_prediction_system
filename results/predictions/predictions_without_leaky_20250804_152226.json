@@ -1,0 +1,32 @@
+{
+    "n_total": 2336,
+    "n_evaluated": 0,
+    "n_missing": 2336,
+    "model_scenario": "without_leaky",
+    "prediction_date": "2025-08-04 15:22:26",
+    "predictions_distribution": {
+        "ya": 1851,
+        "tidak": 485
+    },
+    "average_confidence": 0.8426702236095276,
+    "confidence_stats": {
+        "mean": 0.8426702236095276,
+        "std": 0.07647482881890684,
+        "min": 0.5284217230200807,
+        "max": 0.963119723447553,
+        "median": 0.8724967753643245
+    },
+    "model_agreement_stats": {
+        "all_models_agree": 2272,
+        "two_models_agree": 64,
+        "only_ensemble": 0,
+        "agreement_percentage": 97.26027397260275
+    },
+    "probability_ya_stats": {
+        "mean": 0.7253317891953897,
+        "std": 0.26930542013645536,
+        "min": 0.0368802802777373,
+        "max": 0.9075365372054119,
+        "median": 0.8624034835660144
+    }
+}

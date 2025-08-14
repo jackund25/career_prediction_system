@@ -1,0 +1,94 @@
+{
+  "timestamp": "2025-08-11T02:07:33.149630",
+  "years_analyzed": [
+    2014,
+    2015,
+    2016,
+    2017
+  ],
+  "data_shapes": {
+    "2014": [
+      2356,
+      16
+    ],
+    "2015": [
+      2351,
+      16
+    ],
+    "2016": [
+      2422,
+      16
+    ],
+    "2017": [
+      2336,
+      16
+    ]
+  },
+  "column_compatibility": {
+    "common_columns": [
+      "NIM",
+      "IP",
+      "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]",
+      "Bidang usaha bekerja",
+      "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]",
+      "Program Studi",
+      "Pekerjaan utama saat ini?",
+      "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?",
+      "Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!",
+      "Fakultas/Sekolah",
+      "Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)",
+      "Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!",
+      "Angkatan",
+      "Jelaskan tugas-tugas utama dalam pekerjaan Anda saat ini?"
+    ],
+    "all_columns": [
+      "NIM",
+      "IP",
+      "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]",
+      " Sub Bidang Usaha bekerja",
+      "Bidang usaha bekerja",
+      "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]",
+      "Program Studi",
+      "Pekerjaan utama saat ini?",
+      "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?",
+      "Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!",
+      "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?",
+      "Fakultas/Sekolah",
+      "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang kuliah?",
+      "Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)",
+      "Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!",
+      "Angkatan",
+      "Sub Bidang Usaha bekerja",
+      "Jelaskan tugas-tugas utama dalam pekerjaan Anda saat ini?"
+    ],
+    "year_specific": {
+      "2014": [
+        "Sub Bidang Usaha bekerja",
+        "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang kuliah?"
+      ],
+      "2015": [
+        "Sub Bidang Usaha bekerja",
+        "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang kuliah?"
+      ],
+      "2016": [
+        "Sub Bidang Usaha bekerja",
+        "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?"
+      ],
+      "2017": [
+        " Sub Bidang Usaha bekerja",
+        "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?"
+      ]
+    }
+  },
+  "recommendations": [
+    "\u2713 Target column present in all years",
+    "\u2713 Feature 'IP' present in all years",
+    "\u2713 Feature 'Program Studi' present in all years",
+    "\u2713 Feature 'Fakultas/Sekolah' present in all years",
+    "\u2713 Feature 'Bidang usaha bekerja' present in all years",
+    "\u2713 Year 2014 has 2356 samples (sufficient)",
+    "\u2713 Year 2015 has 2351 samples (sufficient)",
+    "\u2713 Year 2016 has 2422 samples (sufficient)",
+    "\u2713 Year 2017 has 2336 samples (sufficient)"
+  ]
+}

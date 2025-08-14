@@ -1,0 +1,39 @@
+{
+  "common_columns": [
+    "NIM",
+    "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?",
+    "Bidang usaha bekerja",
+    "Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!",
+    "Jelaskan tugas-tugas utama dalam pekerjaan Anda saat ini?",
+    "Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!",
+    "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]",
+    "IP",
+    "Program Studi",
+    "Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)",
+    "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?",
+    "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]"
+  ],
+  "numerical_columns": [
+    "NIM",
+    "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [memulai pekerjaan]",
+    "IP",
+    "Seberapa besar program studi Anda bermanfaat untuk hal-hal di bawah ini? [pembelajaran yang berkelanjutan dalam pekerjaan]"
+  ],
+  "categorical_columns": [
+    "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?",
+    "Bidang usaha bekerja",
+    "Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!",
+    "Jelaskan tugas-tugas utama dalam pekerjaan Anda saat ini?",
+    "Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!",
+    "Program Studi",
+    "Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)",
+    "Apakah pekerjaan yang Anda lakukan di tempat bekerja sesuai dengan bidang keilmuan?"
+  ],
+  "features_with_drift": [
+    "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?",
+    "Sebutkan kategori jenis pekerjaan yang Anda lakukan di tempat bekerja!",
+    "Jelaskan tugas-tugas utama dalam pekerjaan Anda saat ini?",
+    "Sebutkan jenis kegiatan di organisasi yang aktif diikuti yang membantu mengasah kemampuan/skill Anda!",
+    "Organisasi apa yang paling aktif Anda ikuti selama menjalani perkuliahan? (nama organisasi)"
+  ]
+}
