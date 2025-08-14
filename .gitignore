@@ -1,3 +1,6 @@
+# ================================================
+# Python
+# ================================================
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -49,61 +52,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-*.ipynb
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# ================================================
+# Virtual Environments
+# ================================================
 .env
 .venv
 env/
@@ -111,42 +62,63 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+career_prediction/
+career-pred-sys/
+venv_new/
+.conda/
+conda-env/
 
-# Spyder project settings
-.spyderproject
-.spyproject
+# ================================================
+# Jupyter Notebooks
+# ================================================
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+# Uncomment below if you want to exclude ALL notebooks
+# *.ipynb
 
-# Rope project settings
-.ropeproject
+# IPython
+profile_default/
+ipython_config.py
 
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
+# ================================================
+# IDEs and Editors
+# ================================================
 # PyCharm
 .idea/
+*.iml
 
 # VS Code
 .vscode/
 *.code-workspace
+.history/
 
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ================================================
+# OS Files
+# ================================================
 # macOS
 .DS_Store
 .AppleDouble
 .LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
 
 # Windows
 Thumbs.db
@@ -165,97 +137,117 @@ $RECYCLE.BIN/
 .Trash-*
 .nfs*
 
-# Data files
-data/01_raw/*
-data/02_processed/*
+# ================================================
+# Data Files (Be Selective)
+# ================================================
+# Keep raw data structure but not the files
+data/01_raw/*.csv
+data/01_raw/*.xlsx
+data/01_raw/*.xls
 !data/01_raw/.gitkeep
-!data/02_processed/.gitkeep
+!data/01_raw/README.md
 
-# Model files
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/*.pt
-models/*.pth
-models/*.onnx
-models/*.pb
+# Processed data can be regenerated
+data/02_processed/*.csv
+data/02_processed/*.parquet
+data/02_processed/*.pkl
+!data/02_processed/.gitkeep
+!data/02_processed/column_analysis.json
+!data/02_processed/compatibility_report.json
+!data/02_processed/final_analysis_results.json
+
+# Features
+data/03_features/*.csv
+data/03_features/*.pkl
+!data/03_features/.gitkeep
+
+# ================================================
+# Model Files
+# ================================================
+# Exclude all model binaries but keep structure
 models/**/*.pkl
 models/**/*.joblib
-*.pkl
-*.joblib
-*.h5
-*.pt
-*.pth
+models/**/*.h5
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+models/**/*.pb
+models/**/*.bin
+models/**/*.safetensors
 
-# Temporary files
+# But KEEP important config files
+!models/**/best_params.json
+!models/**/model_config.json
+!models/**/feature_names.json
+
+# ================================================
+# MLflow & Experiment Tracking
+# ================================================
+mlruns/
+mlflow.db
+mlflow-artifacts/
+experiments/mlruns/
+
+# ================================================
+# CatBoost Info
+# ================================================
+catboost_info/
+*.cbm
+
+# ================================================
+# Logs
+# ================================================
+logs/*.log
+logs/**/*.log
+!logs/.gitkeep
+*.log
+
+# ================================================
+# Results - Be Selective
+# ================================================
+# Keep JSON results but not large CSVs
+results/predictions/*.csv
+!results/predictions/*.json
+
+# Keep important result files
+!results/**/best_params.json
+!results/**/validation_results.json
+!results/**/summary_report.txt
+!results/**/experiment_comparison.json
+!results/**/comparison_summary.json
+!results/**/final_experiment_report.json
+
+# Exclude Optuna studies (large pickle files)
+results/**/optuna_study_*.pkl
+
+# ================================================
+# Plots and Visualizations
+# ================================================
+plots/**/*.png
+plots/**/*.jpg
+plots/**/*.jpeg
+plots/**/*.pdf
+plots/**/*.svg
+!plots/**/.gitkeep
+
+reports_figures/**/*.png
+reports_figures/**/*.jpg
+reports_figures/**/*.pdf
+!reports_figures/**/.gitkeep
+
+# ================================================
+# Temporary and Cache Files
+# ================================================
 *.tmp
 *.temp
 *.swp
 *.swo
 *~
-
-# Log files
-logs/
-*.log
-
-# Output files and reports - INCLUDING IMAGES
-reports/figures/*.png
-reports/figures/*.jpg
-reports/figures/*.jpeg
-reports/figures/*.gif
-reports/figures/*.svg
-reports/figures/*.pdf
-reports/*.html
-reports/*.pdf
-
-# Plot outputs
-plots/
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
-*.pdf
-*.eps
-*.tiff
-*.bmp
-
-# Visualization outputs
-visualizations/
-figures/
-images/
-output_images/
-results/figures/
-results/plots/
-results/images/
-results/**/*.png
-results/**/*.jpg
-results/**/*.pdf
-
-# But keep specific documentation images if needed
-!docs/images/*.png
-!docs/images/*.jpg
-!README_images/*.png
-
-# Credentials and secrets
-credentials/
-secrets/
-*.pem
-*.key
-config/secrets.yaml
-config/credentials.yaml
-
-# Large files
-*.zip
-*.tar
-*.tar.gz
-*.rar
-*.7z
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
+*.bak
+*.cache
+tmp/
+temp/
+cache/
 
 # Excel temporary files
 ~$*.xlsx
@@ -263,58 +255,123 @@ config/credentials.yaml
 ~$*.xlsm
 ~$*.xlsb
 
-# CSV outputs (if you want to exclude)
-# results/*.csv
-# output/*.csv
+# ================================================
+# Large Files
+# ================================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.gz
+*.bz2
 
-# R files (if using R)
-.Rhistory
-.RData
-.Rproj.user/
+# ================================================
+# Database Files
+# ================================================
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
 
-# Node modules (if using any JS tools)
-node_modules/
+# ================================================
+# Credentials and Secrets
+# ================================================
+credentials/
+secrets/
+*.pem
+*.key
+*.crt
+config/secrets.yaml
+config/credentials.yaml
+.env.local
+.env.production
+.env.*.local
+api_keys.json
+credentials.json
+secrets.json
+*_private.json
 
-# Specific project files to ignore
-experimental_notebooks/
-old_versions/
-scratch/
-temp_analysis/
+# ================================================
+# Python Specific Tools
+# ================================================
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Keep these files/folders
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# ================================================
+# Documentation Build Files
+# ================================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# ================================================
+# Files to Explicitly KEEP
+# ================================================
 !.gitkeep
 !requirements.txt
+!requirements_new.txt
 !README.md
 !setup.py
 !environment.yml
+!pyproject.toml
 
-# Keep placeholder files in empty directories
-!data/
-!data/*/
-!models/
-!reports/
-!results/
+# Keep project structure documentation
+!PROJECT_STRUCTURE.txt
+!PROJECT_STRUCTURE.md
 
-# JSON files - be selective
-# Exclude large outputs and temporary files
-results/predictions/*.json
-results/predictions/*.csv
-results/experiments/*.json
-output/*.json
-temp/*.json
-cache/*.json
-*.tmp.json
+# Keep important Python files
+!src/**/*.py
+!run_incremental_experiments.py
 
-# Exclude sensitive data
-credentials.json
-secrets.json
-api_keys.json
-*_private.json
+# Keep configuration templates
+!config/*.template
+!config/*.example
 
-# But KEEP configuration and metadata
-!config/*.json
-!models/feature_info.json
-!models/model_metadata.json
-!schemas/*.json
-!requirements.json
+# Keep documentation
+!docs/*.md
+!docs/images/.gitkeep
+
+# ================================================
+# Project Specific Ignores
+# ================================================
+# Backup folders
+backup_before_cleanup/
+old_versions/
+archive/
+deprecated/
+
+# Scratch work
+scratch/
+temp_analysis/
+experimental_notebooks/
+sandbox/
+
+# Generated files that can be recreated
 generate_structure.py
+filter_tracer.py
+tempCodeRunnerFile.py
+
+# ================================================
+# End of .gitignore
+# ================================================
